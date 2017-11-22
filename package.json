@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "main": "async.js",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "eslint . && mocha *.spec.js"
+  },
+  "dependencies": {
+    "assert": "1.4.1",
+    "eslint": "4.8.0",
+    "eslint-config-hrundel": "1.3.0",
+    "mocha": "4.0.1",
+    "request": "2.83.0",
+    "request-promise-native": "1.0.5",
+    "sinon": "4.1.2"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "extends": "hrundel/node",
+  "rules": {
+    "no-console": [
+      "error",
+      {
+        "allow": [
+          "log"
+        ]
+      }
+    ]
+  }
+}
