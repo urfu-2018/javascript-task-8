@@ -1,46 +1,34 @@
 'use strict';
 
-const { format } = require('url');
-const request = require('request-promise-native');
+const { get } = require('got');
 
 const async = require('./async');
 
 const key = require('./key.json').key;
 
 /**
- * Функция возвращает промис, который сразу же переходит в состояние 'pending'
+ * Возвращает функцию, которая возвращает промис
  * @param {String} lang - язык на который нужно перевести
  * @param {String} text - переводимый текст
- * @returns {Promise}
+ * @returns {Function<Promise>}
  */
-function getTranslation(lang, text) {
-    const url = format({
-        protocol: 'https',
-        host: 'translate.yandex.net',
-        pathname: 'api/v1.5/tr.json/translate',
-        query: {
-            key,
-            lang,
-            text
-        }
+function createTranslationJob(lang, text) {
+    return () => get('https://translate.yandex.net/api/v1.5/tr.json/translate', {
+        query: { key, lang, text },
+        json: true
     });
-
-    return request.get(url);
 }
 
-const langs = ['be', 'uk', 'en', 'fr', 'de', 'it', 'pl', 'tr', 'th', 'ja'];
+const languages = ['be', 'uk', 'en', 'fr', 'de', 'it', 'pl', 'tr', 'th', 'ja'];
 const text = 'дайте мне воды';
 
-const jobs = langs.map(lang => getTranslation.bind(null, lang, text));
+const jobs = languages.map(language => createTranslationJob(language, text));
 
 async
     .runParallel(jobs, 2)
-    .then(result => {
-        return result
-            .map(item => item instanceof Error ? item : JSON.parse(item).text[0])
-            .join('\n');
-    })
-    .then(console.log);
+    .then(result => result.map(item => item instanceof Error ? item : item.body.text[0]))
+    .then(translations => translations.join('\n'))
+    .then(console.info);
 
 /*
     дайце мне вады

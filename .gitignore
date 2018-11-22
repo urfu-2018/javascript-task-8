@@ -1,4 +1,10 @@
+.DS_Store
+._*
+.Trashes
+ehthumbs.db
+Thumbs.db
 .idea/
+.vscode/
 node_modules/
 *.log
 key.json
