@@ -8,10 +8,9 @@ const isStar = false;
 
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
- * @param {Number} parallelNum - число одновременно исполняющихся промисов
  * @returns {Promise<Array>}
  */
-function runParallel(jobs, parallelNum) {
+function runParallel(jobs) {
     if (jobs.length === 0) {
         return Promise.resolve([]);
     }
