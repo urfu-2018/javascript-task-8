@@ -42,7 +42,7 @@ async function runParallel(jobs, parallelNum) {
         }
 
         while (lastStartedIndex < parallelNum) {
-            runJob(lastStartedIndex++)
+            runJob(lastStartedIndex++);
         }
     });
 
