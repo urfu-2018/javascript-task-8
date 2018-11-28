@@ -28,7 +28,7 @@ async function runParallel(jobs, parallelNum) {
 
         function saveResultAndTakeNext(result, index) {
             results[index] = result;
-            if (index === jobs.length - 1) {
+            if (results.length === jobs.length) {
                 resolve(results);
 
                 return;
