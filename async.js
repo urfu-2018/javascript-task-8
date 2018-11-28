@@ -12,11 +12,14 @@ const isStar = false;
  * @returns {Promise<Array>}
  */
 async function runParallel(jobs, parallelNum) {
-    const results = [];
-
     return new Promise(resolve => {
+        const results = [];
+        let lastStartedIndex = 0;
+
         if (jobs.length === 0) {
-            return resolve([]);
+            resolve([]);
+
+            return;
         }
 
         function runJob(jobIndex) {
@@ -33,11 +36,13 @@ async function runParallel(jobs, parallelNum) {
 
                 return;
             }
-            runJob(++index);
+            if (lastStartedIndex < jobs.length) {
+                runJob(lastStartedIndex++);
+            }
         }
 
-        for (let i = 0; i < parallelNum; i++) {
-            runJob(i);
+        while (lastStartedIndex < parallelNum) {
+            runJob(lastStartedIndex++)
         }
     });
 
