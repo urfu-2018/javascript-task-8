@@ -6,6 +6,8 @@
  */
 const isStar = true;
 
+const ERROR = new Error('Promise timeout');
+
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
  * @param {Number} parallelNum - число одновременно исполняющихся промисов
@@ -13,7 +15,48 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
-    // асинхронная магия
+    const couples = makeChunks(jobs, parallelNum);
+
+    return couples.reduce((promiseChain, curCouple) => {
+        return promiseChain
+            .then(result => resolveCouple(curCouple, timeout)
+                .then(Array.prototype.concat.bind(result)));
+    }, Promise.resolve([]));
+}
+
+function resolveCouple(coupleOfJobs, timeout) {
+    const promisesArray = coupleOfJobs.map(job => promiseWithTimeout(job(), timeout));
+
+    return Promise.all(promisesArray);
+}
+
+function promiseWithTimeout(promise, ms) {
+    let id;
+    const timeout = new Promise((resolve) => {
+        id = setTimeout(() => {
+            resolve(ERROR);
+        }, ms);
+    });
+
+    return Promise.race([
+        promise,
+        timeout
+    ]).then((result) => {
+        clearTimeout(id);
+
+        return result;
+    });
+}
+
+function makeChunks(array, size) {
+    const copy = array.slice();
+    const result = [];
+
+    while (copy.length) {
+        result.push(copy.splice(0, size));
+    }
+
+    return result;
 }
 
 module.exports = {
