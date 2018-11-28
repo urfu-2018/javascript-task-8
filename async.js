@@ -32,20 +32,19 @@ function resolveCouple(coupleOfJobs, timeout) {
 
 function promiseWithTimeout(promise, ms) {
     let id;
-    const timeout = new Promise((resolve) => {
+    const timeout = new Promise((resolve, reject) => {
         id = setTimeout(() => {
-            resolve(ERROR);
+            reject(ERROR);
         }, ms);
     });
 
     return Promise.race([
         promise,
         timeout
-    ]).then((result) => {
-        clearTimeout(id);
-
-        return result;
-    });
+    ]).catch(error => Promise.resolve(error))
+        .finally(() => {
+            clearTimeout(id);
+        });
 }
 
 function makeChunks(array, size) {
