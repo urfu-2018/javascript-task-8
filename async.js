@@ -8,14 +8,36 @@ const isStar = false;
 
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
+ * @param {Number} parallelNum - число одновременно исполняющихся промисов
  * @returns {Promise<Array>}
  */
-function runParallel(jobs) {
-    if (jobs.length === 0) {
-        return Promise.resolve([]);
-    }
+async function runParallel(jobs, parallelNum) {
+    const results = [];
+    return new Promise(resolve => {
+        if (jobs.length === 0) {
+            return resolve([]);
+        }
 
-    return jobs.reduce((p, f) => p.then(f), Promise.resolve());
+        function runJob(jobIndex) {
+            let job = jobs[jobIndex];
+            Promise.resolve(job())
+                .then(x => saveResultAndTakeNext(x, jobIndex))
+                .catch( x => saveResultAndTakeNext(x, jobIndex));
+        }
+
+        function saveResultAndTakeNext(result, index) {
+            results[index] = result;
+            if(index === jobs.length-1){
+                resolve(results);
+                return;
+            }
+            runJob(++index);
+        }
+
+        for (let i = 0; i < parallelNum; i++) {
+            runJob(i);
+        }
+    })
 
 }
 
