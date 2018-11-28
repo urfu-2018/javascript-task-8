@@ -13,6 +13,7 @@ const isStar = false;
  */
 async function runParallel(jobs, parallelNum) {
     const results = [];
+
     return new Promise(resolve => {
         if (jobs.length === 0) {
             return resolve([]);
@@ -22,13 +23,14 @@ async function runParallel(jobs, parallelNum) {
             let job = jobs[jobIndex];
             Promise.resolve(job())
                 .then(x => saveResultAndTakeNext(x, jobIndex))
-                .catch( x => saveResultAndTakeNext(x, jobIndex));
+                .catch(x => saveResultAndTakeNext(x, jobIndex));
         }
 
         function saveResultAndTakeNext(result, index) {
             results[index] = result;
-            if(index === jobs.length-1){
+            if (index === jobs.length - 1) {
                 resolve(results);
+
                 return;
             }
             runJob(++index);
@@ -37,7 +39,7 @@ async function runParallel(jobs, parallelNum) {
         for (let i = 0; i < parallelNum; i++) {
             runJob(i);
         }
-    })
+    });
 
 }
 
