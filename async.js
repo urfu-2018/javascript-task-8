@@ -41,9 +41,15 @@ function promiseWithTimeout(promise, ms) {
     return Promise.race([
         promise,
         timeout
-    ]).catch(error => Promise.resolve(error))
-        .finally(() => {
+    ]).then(result => {
+        clearTimeout(id);
+
+        return result;
+    })
+        .catch(error => {
             clearTimeout(id);
+
+            return Promise.resolve(error);
         });
 }
 
