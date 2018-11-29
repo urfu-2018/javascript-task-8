@@ -35,24 +35,26 @@ function promiseTimeout(ms, promise) {
     return Promise.race([
         promise,
         timeout
-    ]).then(response => response, error => error);
+    ])
+        .then(response => response, error => error);
 }
 
-function splitJobs(jobs, parallelNum) {
+function splitJobs(jobs, parallelNum) { // num on on level
     var parallels = [];
-    var i = 0;
-    var start = i;
+    var start = 0;
     var step = jobs.length / parallelNum;
-    var finish = step;
-    while (i < parallelNum) {
+    var finish = parallelNum;
+    var j = 1;
+    while (j <= step) {
         parallels.push(jobs.slice(start, finish));
         start = finish;
-        finish = finish + step;
-        i++;
+        finish = (finish + parallelNum > jobs.length) ? jobs.length : finish + parallelNum;
+        j++;
     }
 
     return parallels;
 }
+
 module.exports = {
     runParallel,
 
