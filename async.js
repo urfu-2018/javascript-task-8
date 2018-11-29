@@ -6,7 +6,7 @@
  */
 const isStar = true;
 
-const ERROR = new Error('Promise timeouttTTT');
+const ERROR = new Error('Promise timeout');
 
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
@@ -25,12 +25,12 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 }
 
 function resolveCouple(coupleOfJobs, timeout) {
-    const promisesArray = coupleOfJobs.map(job => promiseWithTimeout(job(), timeout));
+    const promisesArray = coupleOfJobs.map(job => promiseWithTimeout(job, timeout));
 
     return Promise.all(promisesArray);
 }
 
-function promiseWithTimeout(promise, ms) {
+function promiseWithTimeout(promiseFunc, ms) {
     let id;
     const timeout = new Promise((resolve, reject) => {
         id = setTimeout(() => {
@@ -40,7 +40,7 @@ function promiseWithTimeout(promise, ms) {
 
     return Promise.race([
         timeout,
-        promise
+        promiseFunc()
     ]).then(result => {
         clearTimeout(id);
 
