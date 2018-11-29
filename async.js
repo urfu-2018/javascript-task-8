@@ -6,7 +6,7 @@
  */
 const isStar = true;
 
-const ERROR = new Error('Promise timeout');
+const ERROR = new Error('Promise timeouttTTT');
 
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
@@ -20,7 +20,6 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     return couples.reduce((promiseChain, curCouple) => {
         return promiseChain
             .then(result => resolveCouple(curCouple, timeout)
-                .catch(err => Promise.resolve(err))
                 .then(Array.prototype.concat.bind(result)));
     }, Promise.resolve([]));
 }
