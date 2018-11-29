@@ -13,15 +13,35 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum = jobs.length, timeout = 1000) {
-    const a = splitJobs(jobs, parallelNum);
-    var j = [];
-    a.forEach(function (i) {
-        i.forEach(function (b) {
-            j.push(promiseTimeout(timeout, b.call()));
-        });
-    });
+    return new Promise(resolve => {
+        var currentJob = 0;
+        var jobsResults = [];
 
-    return Promise.all(j);
+        if (!jobs.length) {
+            resolve(jobs);
+        }
+        var i = 0;
+        while (i < parallelNum) {
+            doJob(jobs[currentJob], currentJob++);
+            i++;
+        }
+
+        function doJob(job, currentJobIndex) {
+            const resolveResult = result => finishJob(result, currentJobIndex);
+            promiseTimeout(timeout, job())
+                .then(resolveResult, resolveResult);
+        }
+
+        function finishJob(result, index) {
+            jobsResults[index] = result;
+            if (jobsResults.length === jobs.length) {
+                return resolve(jobsResults);
+            }
+            if (currentJob < jobs.length) {
+                doJob(jobs[currentJob], currentJob++);
+            }
+        }
+    });
 }
 
 function promiseTimeout(ms, promise) {
@@ -37,22 +57,6 @@ function promiseTimeout(ms, promise) {
         timeout
     ])
         .then(response => response, error => error);
-}
-
-function splitJobs(jobs, parallelNum) { // num on on level
-    var parallels = [];
-    var start = 0;
-    var step = jobs.length / parallelNum;
-    var finish = parallelNum;
-    var j = 1;
-    while (j <= step) {
-        parallels.push(jobs.slice(start, finish));
-        start = finish;
-        finish = (finish + parallelNum > jobs.length) ? jobs.length : finish + parallelNum;
-        j++;
-    }
-
-    return parallels;
 }
 
 module.exports = {
