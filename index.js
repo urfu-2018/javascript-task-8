@@ -25,7 +25,7 @@ const text = 'дайте мне воды';
 const jobs = languages.map(language => createTranslationJob(language, text));
 
 async
-    .runParallel(jobs, 3)
+    .runParallel(jobs)
     .then(result => result.map(item => item instanceof Error ? item : item.body.text[0]))
     .then(translations => translations.join('\n'))
     .then(console.info);

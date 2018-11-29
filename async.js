@@ -15,6 +15,12 @@ const ERROR = new Error('Promise timeout');
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
+    if (!parallelNum) {
+        parallelNum = jobs.length;
+    }
+    if (!jobs.length) {
+        return Promise.resolve([]);
+    }
     const couples = makeChunks(jobs, parallelNum);
 
     return couples.reduce((promiseChain, curCouple) => {
