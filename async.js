@@ -20,7 +20,8 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     return couples.reduce((promiseChain, curCouple) => {
         return promiseChain
             .then(result => resolveCouple(curCouple, timeout)
-                .then(nextResult => [...result, ...nextResult]));
+                .catch(err => Promise.resolve(err))
+                .then(Array.prototype.concat.bind(result)));
     }, Promise.resolve([]));
 }
 
