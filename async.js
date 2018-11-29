@@ -15,6 +15,10 @@ const isStar = false;
 function runParallel(jobs, parallelNum) {
     // асинхронная магия
 
+    if (!jobs.length || parallelNum <= 0) {
+        return Promise.resolve([]);
+    }
+
     let jobsArray = [];
     let index = 0;
     for (let i = 0; i < jobs.length; i += parallelNum) {
