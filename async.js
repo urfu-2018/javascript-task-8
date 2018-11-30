@@ -25,7 +25,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         }
 
         function doJob(index) {
-            const job = jobs[index]();
+            const job = jobs[index];
             const addResult = res => {
                 result[index] = res;
                 if (currentIndex === jobs.length) {
@@ -36,7 +36,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             const promiseTimer = new Promise(reject => {
                 setTimeout(reject, timeout, new Error('Promise timeout'));
             });
-            Promise.race([job, promiseTimer]).then(addResult, addResult);
+            Promise.race([job(), promiseTimer]).then(addResult, addResult);
         }
     });
 }
