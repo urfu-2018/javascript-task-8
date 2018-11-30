@@ -23,7 +23,6 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         for (let i = 0; i < count; i++) {
             doJob(currentIndex++);
         }
-        
 
         async function doJob(index) {
             const job = jobs[index];
