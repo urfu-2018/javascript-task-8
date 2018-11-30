@@ -15,7 +15,7 @@ const isStar = true;
 function runParallel(jobs, parallelNum, timeout = 1000) {
     return new Promise(resolve => {
         if (!jobs.length) {
-            return resolve([]);
+            resolve([]);
         }
         const result = [];
         let currentIndex = 0;
@@ -23,6 +23,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         for (let i = 0; i < count; i++) {
             doJob(currentIndex++);
         }
+        
 
         async function doJob(index) {
             const job = jobs[index];
@@ -31,7 +32,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             });
             result[index] = await Promise.race([job(), promiseTimer]).then(res => res, err => err);
             if (result.length === jobs.length) {
-                return resolve(result);
+                resolve(result);
             }
             if (currentIndex < jobs.length) {
                 doJob(currentIndex++);
