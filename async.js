@@ -33,10 +33,12 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                 }
                 doJob(currentIndex++);
             };
-            const promiseTimer = new Promise(reject => {
-                setTimeout(reject, timeout, new Error('Promise timeout'));
-            });
-            Promise.race([job(), promiseTimer]).then(addResult, addResult);
+            Promise.race([
+                job(),
+                new Promise(reject => {
+                    setTimeout(reject, timeout, new Error('Promise timeout'));
+                })
+            ]).then(addResult, addResult);
         }
     });
 }
