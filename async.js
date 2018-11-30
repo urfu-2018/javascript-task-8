@@ -15,59 +15,60 @@ const ERROR = new Error('Promise timeout');
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
-    if (!parallelNum) {
-        parallelNum = jobs.length;
-    }
-    if (!jobs.length) {
-        return Promise.resolve([]);
-    }
-    const couples = makeChunks(jobs, parallelNum);
+    let jobPointer = 0;
+    let jobsLeft = jobs.length;
+    const resultArray = [];
 
-    return couples.reduce((promiseChain, curCouple) => {
-        return promiseChain
-            .then(result => resolveCouple(curCouple, timeout)
-                .then(Array.prototype.concat.bind(result)));
-    }, Promise.resolve([]));
-}
+    return new Promise(resolve => {
+        if (!jobs.length) {
+            resolve([]);
 
-function resolveCouple(coupleOfJobs, timeout) {
-    const promisesArray = coupleOfJobs.map(job => promiseWithTimeout(job, timeout));
+            return;
+        }
+        const limit = jobs.length < parallelNum ? jobs.length : parallelNum;
 
-    return Promise.all(promisesArray);
-}
+        for (; jobPointer < limit; jobPointer++) {
+            startJob(jobs[jobPointer], jobPointer, timeout);
+        }
 
-function promiseWithTimeout(promiseFunc, ms) {
-    let id;
-    const timeout = new Promise((resolve, reject) => {
-        id = setTimeout(() => {
-            reject(ERROR);
-        }, ms);
+        function startJob(promiseFunc, jobIndex) {
+            let id;
+
+            return Promise.race([
+                promiseFunc(),
+                new Promise((res, reject) => {
+                    id = setTimeout(() => {
+                        reject(ERROR);
+                    }, timeout);
+                })
+            ]).then(result => {
+                clearTimeout(id);
+                resultArray[jobIndex] = result;
+
+                return startNextJob();
+            })
+                .catch(error => {
+                    clearTimeout(id);
+                    resultArray[jobIndex] = error;
+
+                    return startNextJob();
+                });
+        }
+
+        function startNextJob() {
+            jobsLeft--;
+            if (jobsLeft === 0) {
+                resolve(resultArray);
+
+                return;
+            }
+
+            if (jobPointer < jobs.length) {
+                startJob(jobs[jobPointer], jobPointer);
+                jobPointer++;
+            }
+        }
     });
-
-    return Promise.race([
-        timeout,
-        promiseFunc()
-    ]).then(result => {
-        clearTimeout(id);
-
-        return Promise.resolve(result);
-    })
-        .catch(error => {
-            clearTimeout(id);
-
-            return Promise.resolve(error);
-        });
-}
-
-function makeChunks(array, size) {
-    const copy = array.slice();
-    const result = [];
-
-    while (copy.length) {
-        result.push(copy.splice(0, size));
-    }
-
-    return result;
 }
 
 module.exports = {
