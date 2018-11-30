@@ -5,6 +5,7 @@ const { get } = require('got');
 const async = require('./async');
 
 const key = require('./key.json').key;
+// console.log('heeey')
 
 /**
  * Возвращает функцию, которая возвращает промис
@@ -23,6 +24,7 @@ const languages = ['be', 'uk', 'en', 'fr', 'de', 'it', 'pl', 'tr', 'th', 'ja'];
 const text = 'дайте мне воды';
 
 const jobs = languages.map(language => createTranslationJob(language, text));
+
 
 async
     .runParallel(jobs, 2)
