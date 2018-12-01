@@ -23,7 +23,7 @@ async function runParallel(jobs, parallelNum/* timeout = 1000 */) {
         result.push(...currentResult);
     }
 
-    return Promise.resolve(result);
+    return result;
 }
 
 async function doJob(job) {
