@@ -35,7 +35,7 @@ function runParallel(jobs, parallelNum) {
         }
 
         if (error) {
-            return Promise.resolve(results);
+            return Promise.reject(error);
         }
 
         return Promise.resolve(results);
