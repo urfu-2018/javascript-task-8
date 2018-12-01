@@ -18,17 +18,17 @@ function runParallel(jobs, parallelNum = 1, timeout = 1000) {
         parallelJobs = parallelJobs.concat([jobs.splice(0, parallelNum)]);
     }
 
-    return Promise.all(parallelJobs.map(thread => Promise.all(thread.map(job =>
+    return Promise.all(parallelJobs.map(async thread => await Promise.all(thread.map(job =>
         createRace(job(), timeout))))).then(result => [].concat(...result));
 }
 
 async function createRace(promise, timeout) {
-    const timer = new Promise((resolve, reject) => {
-        setTimeout(reject, timeout);
-    }).catch(() => new Error('Promise timeout'));
-
-    return await Promise.race([promise, timer])
-        .then(result => result);
+    return await Promise.race([
+        promise,
+        new Promise((resolve, reject) => {
+            setTimeout(reject, timeout);
+        }).catch(() => new Error('Promise timeout'))
+    ]).then(result => result, error => error);
 }
 
 module.exports = {
