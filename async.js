@@ -14,10 +14,10 @@ const isStar = true;
  * @returns {Promise}
  */
 function promiseTimeout(ms, promise) {
-    let timeout = new Promise(resolve => {
+    let timeout = new Promise((resolve, reject) => {
         let id = setTimeout(() => {
             clearTimeout(id);
-            resolve(new Error('Promise timeout'));
+            reject(new Error('Promise timeout'));
         }, ms);
     });
 
@@ -46,7 +46,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         }
 
         function runPromise(num) {
-            promiseTimeout(timeout, jobs[num]()).then(result => {
+            const callback = result => {
                 results[num] = result;
                 if (++finished === jobs.length) {
                     return resolve(results);
@@ -54,7 +54,9 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                 if (count < jobs.length) {
                     runPromise(count++);
                 }
-            });
+            };
+            promiseTimeout(timeout, jobs[num]())
+                .then(callback, callback);
         }
     });
 }
