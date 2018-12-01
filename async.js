@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 'use strict';
 
 /**
@@ -6,6 +7,24 @@
  */
 const isStar = true;
 
+/**
+ * Добавляет к Promise таймаут. Если таймаутзакончился, то вернется resolve(Error)
+ * @param {Number} ms - timeout
+ * @param {Promise} promise - promise
+ * @returns {Promise}
+ */
+function promiseTimeout(ms, promise) {
+    let timeout = new Promise(resolve => {
+        let id = setTimeout(() => {
+            clearTimeout(id);
+            resolve(new Error('Promise timeout'));
+        }, ms);
+    });
+
+    return Promise.race([promise, timeout]);
+}
+
+
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
  * @param {Number} parallelNum - число одновременно исполняющихся промисов
@@ -13,7 +32,31 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
-    // асинхронная магия
+    if (jobs.length === 0) {
+        return Promise.resolve([]);
+    }
+
+    return new Promise(resolve => {
+        const results = new Array(jobs.length);
+        let finished = 0;
+        let count = 0;
+
+        for (count = 0; count < Math.min(parallelNum, jobs.length); count++) {
+            runPromise(count);
+        }
+
+        function runPromise(num) {
+            promiseTimeout(timeout, jobs[num]()).then(result => {
+                results[num] = result;
+                if (++finished === jobs.length) {
+                    return resolve(results);
+                }
+                if (count < jobs.length) {
+                    runPromise(count++);
+                }
+            });
+        }
+    });
 }
 
 module.exports = {
