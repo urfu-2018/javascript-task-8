@@ -31,6 +31,7 @@ function runParallel(jobs, parallelNum) {
                 result.push(...values);
             } catch (err) {
                 error = err;
+                break;
             }
         }
 
