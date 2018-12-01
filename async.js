@@ -47,7 +47,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             new Promise((resolve, reject) => {
                 const id = setTimeout(() => {
                     clearTimeout(id);
-                    reject(new Error('promise timeout!'));
+                    reject(new Error('Promise timeout'));
                 }, timeout);
             })]);
     }
