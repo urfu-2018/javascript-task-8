@@ -46,4 +46,27 @@ describe('runParallel tests', () => {
                 assert.equal(values[1], 17);
             });
     });
+
+    it('Empty array of jobs', () => {
+        return async
+            .runParallel([], 5)
+            .then(value => {
+                assert(value.length === 0);
+            });
+    });
+
+    it('Error test', () => {
+        async
+            .runParallel([
+                () => new Promise((resolve, reject) => {
+                    reject(new Error());
+                })
+            ], 2)
+            .catch(err => {
+                // assert.instanceOf(err, Error);
+                assert.throws(() => {
+                    throw err;
+                }, Error);
+            });
+    });
 });
