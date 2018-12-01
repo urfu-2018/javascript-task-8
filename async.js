@@ -13,23 +13,25 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum = 1, timeout = 1000) {
-    console.info(parallelNum);
+    let parallelJobs = [];
+    while (jobs.length > 0) {
+        parallelJobs = parallelJobs.concat([jobs.splice(0, parallelNum)]);
+    }
 
-    return Promise.all(jobs.map(job =>
-        createRace(job(), timeout))).then(result => [].concat(...result));
+    return new Promise(resolve => {
+        resolve(Promise.all(parallelJobs.map(async thread => await Promise.all(thread.map(job =>
+            createRace(job(), timeout))))).then(result => [].concat(...result)));
+    });
 }
 
-async function createRace(promise, timeout) {
-    return await Promise.race([
+function createRace(promise, timeout) {
+    return Promise.race([
         promise,
-        new Promise((resolve, reject) => {
-            setTimeout(reject, timeout);
-        }).catch(() => new Error('Promise timeout'))
-    ]).then(result => result, error => error);
+        new Promise((resolve, reject) => setTimeout(reject, timeout))
+    ]).then(result => result, () => new Error('Promise timeout'));
 }
 
 module.exports = {
     runParallel,
-
     isStar
 };
