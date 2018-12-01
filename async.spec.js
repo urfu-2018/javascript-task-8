@@ -20,14 +20,30 @@ describe('runParallel tests', () => {
         const firstSpy = sinon.spy();
         const secondSpy = sinon.spy();
 
-        return async.runParallel([
-            createAsyncJob(firstSpy),
-            createAsyncJob(secondSpy)
-        ], 1).then(() => {
-            assert(firstSpy.calledOnce, 'Spy №1 вызван один раз');
-            assert(secondSpy.calledOnce, 'Spy №2 вызван один раз');
+        return async
+            .runParallel([
+                createAsyncJob(firstSpy),
+                createAsyncJob(secondSpy)
+            ], 1)
+            .then(() => {
+                assert(firstSpy.calledOnce, 'Spy №1 вызван один раз');
+                assert(secondSpy.calledOnce, 'Spy №2 вызван один раз');
 
-            assert(firstSpy.calledBefore(secondSpy), 'Spy №1 вызван перед Spy №2');
-        });
+                assert(firstSpy.calledBefore(secondSpy), 'Spy №1 вызван перед Spy №2');
+            });
+    });
+
+    it('Simple test', () => {
+        return async
+            .runParallel([
+                () => Promise.resolve('a'),
+                () => new Promise((resolve) => {
+                    resolve(17);
+                })
+            ], 1)
+            .then(values => {
+                assert.equal(values[0], 'a');
+                assert.equal(values[1], 17);
+            });
     });
 });
