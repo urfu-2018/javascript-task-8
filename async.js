@@ -13,9 +13,10 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum = 1, timeout = 1000) {
+    const partSize = jobs.length / parallelNum;
     let parallelJobs = [];
     while (jobs.length > 0) {
-        parallelJobs = parallelJobs.concat([jobs.splice(0, parallelNum)]);
+        parallelJobs = parallelJobs.concat([jobs.splice(0, partSize)]);
     }
 
     return Promise.all(parallelJobs.map(thread =>
