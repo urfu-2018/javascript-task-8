@@ -19,19 +19,22 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
     return new Promise(resolve => {
         const result = new Array(jobs.length);
-        let completedTasks = 0;
-        let runningTasks = 0;
+        let completedTasksCount = 0;
+        let runningOrCompetedTasksCount = 0;
         for (var i = 0; i < Math.min(parallelNum, jobs.length); i++) {
             createTask(i);
         }
 
+        /** Функция создает Promise с callback - запуском следующего таска из очереди
+         * @param {Number} num -номер текущего задания
+         */
         function createTask(num) {
-            runningTasks += 1;
+            runningOrCompetedTasksCount += 1;
             const cb = x => {
                 result[num] = x;
-                completedTasks += 1;
-                if (completedTasks !== jobs.length) {
-                    createTask(runningTasks);
+                completedTasksCount += 1;
+                if (completedTasksCount !== jobs.length) {
+                    createTask(runningOrCompetedTasksCount);
                 } else {
                     return resolve(result);
                 }
@@ -42,9 +45,14 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         }
     });
 
+    /** Функция, подготавливающая два задания - переданное и
+     * setTimeout для ограничения времени выполнения
+     * @param {Promise} job - задание
+     * @returns {Promise}
+     */
     function runWithTimeout(job) {
         return Promise.race([job,
-            new Promise((resolve, reject) => {
+            new Promise((_, reject) => {
                 const id = setTimeout(() => {
                     clearTimeout(id);
                     reject(new Error('Promise timeout'));
