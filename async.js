@@ -13,6 +13,10 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 async function runParallel(jobs, parallelNum, timeout = 1000) {
+    if (jobs.length === 0) {
+        return [];
+    }
+
     const workList = [];
     const resultList = new Array(jobs.length);
     for (let i = 0; i < jobs.length; i++) {
