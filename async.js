@@ -14,7 +14,7 @@ const isStar = false;
  */
 async function runParallel(jobs, parallelNum/* timeout = 1000 */) {
     if (jobs.length === 0) {
-        return Promise.reject([]);
+        return Promise.resolve([]);
     }
     const result = [];
     while (jobs.length !== 0) {
