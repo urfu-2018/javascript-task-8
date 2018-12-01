@@ -13,13 +13,12 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
-    let currentJobIndex = 0;
     const result = [];
 
     return new Promise(resolve => {
         const startNextJob = () => {
             if (result.length !== jobs.length) {
-                return startJob(currentJobIndex++);
+                return startJob(result.length);
             }
             resolve(result);
         };
