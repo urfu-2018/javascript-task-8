@@ -28,7 +28,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         }
 
         function run(index) {
-            const job = jobs[index];
+            let job = jobs[index];
 
             Promise.race([
                 job(),
