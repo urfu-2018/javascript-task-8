@@ -31,7 +31,8 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             };
             new Promise((resolverTimeout) => {
                 setTimeout(resolverTimeout, timeout, new Error('Promise timeout'));
-                jobs[RequestQueueIndex]().then(resolverTimeout).catch(resolverTimeout);
+                jobs[RequestQueueIndex]().then(resolverTimeout)
+                    .catch(resolverTimeout);
             })
                 .then(makeTranslation);
         };
