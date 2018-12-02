@@ -36,8 +36,9 @@ class JobScheduler {
 
             return;
         }
-
-        this.runJob();
+        if (this.jobIndex < this.jobs.length) {
+            this.runJob();
+        }
     }
 
     runJob() {
