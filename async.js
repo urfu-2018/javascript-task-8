@@ -7,10 +7,8 @@
 const isStar = true;
 
 function limit(timeout) {
-    return new Promise(resolve => setTimeout(resolve, timeout))
-        .then(() => {
-            throw new Error();
-        });
+    return new Promise(resolve =>
+        setTimeout(resolve, timeout, new Error('Promise timeout')));
 }
 
 class JobScheduler {
