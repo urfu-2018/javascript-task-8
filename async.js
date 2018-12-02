@@ -24,7 +24,7 @@ async function runParallel(jobs, parallelNum/* timeout = 1000 */) {
     let currentJobIndex = 0;
 
     const worker = async () => {
-        while (result.length !== jobs.length && currentJobIndex < jobs.length) {
+        while (result.length < jobs.length && currentJobIndex < jobs.length) {
             try {
                 const currentJob = jobs[currentJobIndex];
                 result[currentJobIndex] = await currentJob();
