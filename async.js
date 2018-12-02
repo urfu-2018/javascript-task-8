@@ -46,17 +46,15 @@ function runParallel(jobs, parallelNum = jobs.length, timeout = 1000) {
 
 function promiseTimeout(ms, promise) {
     let timeout = new Promise((resolve, reject) => {
-        let id = setTimeout(() => {
-            clearTimeout(id);
-            reject();
+        setTimeout(() => {
+            reject(new Error('Promise timeout'));
         }, ms);
-    }).catch(() => new Error('Promise timeout'));
+    });
 
     return Promise.race([
         promise,
         timeout
-    ])
-        .then(response => response, error => error);
+    ]);
 }
 
 module.exports = {
