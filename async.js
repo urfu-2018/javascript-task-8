@@ -14,11 +14,11 @@ const isStar = true;
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
     if (jobs.length === 0) {
-        Promise.resolve([]);
+        return Promise.resolve([]);
     }
 
     return new Promise((resolve) => {
-        let index = 0;
+        var index = 0;
         const translatedWordsArray = [];
         const requestQueue = (RequestQueueIndex) => {
             const makeTranslation = (item) => {
@@ -37,7 +37,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             })
                 .then(makeTranslation);
         };
-        for (let i = 0; i < Math.min(parallelNum, jobs.length); i++) {
+        for (var i = 0; i < Math.min(parallelNum, jobs.length); i++) {
             requestQueue(i);
         }
     });
