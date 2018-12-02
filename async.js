@@ -16,6 +16,9 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     if (jobs.length === 0) {
         return Promise.resolve([]);
     }
+    if (jobs.length < parallelNum) {
+        parallelNum = jobs.length;
+    }
 
     let results = [];
     let indexOfJob = 0;
@@ -24,12 +27,10 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         resolve => {
             function makeResult(currentIndex, result) {
                 results[currentIndex] = result;
-                if (currentIndex === jobs.length) {
+                if (results.length === jobs.length) {
                     return resolve(results);
                 }
-                if (indexOfJob < jobs.length) {
-                    doJob(indexOfJob++);
-                }
+                doJob(indexOfJob++);
             }
 
             function doJob(currentIndex) {
