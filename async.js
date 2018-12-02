@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализована остановка промиса по таймауту
  */
-const isStar = false;
+const isStar = true;
 
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
@@ -12,7 +12,7 @@ const isStar = false;
  * @param {Number} timeout - таймаут работы промиса
  * @returns {Promise<Array>}
  */
-function runParallel(jobs, parallelNum) {
+function runParallel(jobs, parallelNum, timeout = 1000) {
     // асинхронная магия
 
     if (!jobs.length || parallelNum <= 0) {
@@ -29,7 +29,7 @@ function runParallel(jobs, parallelNum) {
     return new Promise((resolve) => {
         let results = [];
         jobPackets.reduce((acc, val) => acc
-            .then(() => executePacket(val))
+            .then(() => executePacket(val, timeout))
             .then(res => {
                 results = results.concat(res);
             }), Promise.resolve())
@@ -37,8 +37,17 @@ function runParallel(jobs, parallelNum) {
     });
 }
 
-function executePacket(jobsPacket) {
-    return Promise.all(jobsPacket.map(job => nonFailPromise(job())));
+function executePacket(jobsPacket, timeout) {
+    return Promise.all(jobsPacket.map(job => nonFailPromise(timeoutPromise(job(), timeout))));
+}
+
+function timeoutPromise(promise, timeout) {
+    return Promise.race([
+        promise,
+        new Promise((resolve, reject) => {
+            setTimeout(reject, timeout, new Error('Promise timeout'));
+        })
+    ]);
 }
 
 function nonFailPromise(promise) {
