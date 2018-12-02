@@ -16,7 +16,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     // асинхронная магия
     return new Promise(resolve => {
         if (!jobs.length) {
-            return resolve([]);
+            resolve([]);
         }
         const result = [];
         let tmpIndex = 0;
@@ -28,13 +28,13 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         async function doSomething(index) {
             const job = jobs[index];
             const timer = new Promise(reject => {
-                setTimeout(reject, timeout, new Error());
+                setTimeout(reject, timeout);
             });
             result[index] = await Promise.race([job(), timer]).then(resol => resol, err => err);
             if (result.length === jobs.length) {
                 resolve(result);
             }
-            if (result.length < jobs.length) {
+            if (jobs.length > result.length) {
                 doSomething(tmpIndex++);
             }
         }
