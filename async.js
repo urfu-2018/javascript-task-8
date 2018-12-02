@@ -29,7 +29,8 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             const timer = new Promise(reject => {
                 setTimeout(reject, timeout, new Error('Promise timeout'));
             });
-            result[index] = await Promise.race([job(), timer]);
+            result[index] = await Promise.race([job(), timer])
+                .then(resolve, reject);
             if (result.length === jobs.length) {
                 resolve(result);
             }
