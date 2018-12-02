@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализована остановка промиса по таймауту
  */
-const isStar = false;
+const isStar = true;
 
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
@@ -28,9 +28,10 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         async function doSomething(index) {
             const job = jobs[index];
             const timer = new Promise(reject => {
-                setTimeout(reject, timeout);
+                setTimeout(reject, timeout, new Error('Promise timeout'));
             });
-            result[index] = await Promise.race([job(), timer]).then(resol => resol, err => err);
+            result[index] = await Promise.race([job(), timer])
+                .then(resol => resol, err => err);
             if (result.length === jobs.length) {
                 resolve(result);
             }
