@@ -18,13 +18,13 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     }
 
     return new Promise((resolve) => {
-        var index = 0;
-        var arrayTranslateWords = [];
-        var requestQueue = (RequestQueueIndex) => {
-            var makeTranslation = (item) => {
-                arrayTranslateWords[RequestQueueIndex] = item;
-                if (jobs.length === arrayTranslateWords.length) {
-                    resolve(arrayTranslateWords);
+        let index = 0;
+        const translatedWordsArray = [];
+        const requestQueue = (RequestQueueIndex) => {
+            const makeTranslation = (item) => {
+                translatedWordsArray[RequestQueueIndex] = item;
+                if (jobs.length === translatedWordsArray.length) {
+                    resolve(translatedWordsArray);
                 } else {
                     requestQueue(++index);
                 }
@@ -37,7 +37,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             })
                 .then(makeTranslation);
         };
-        for (var i = 0; i < Math.min(parallelNum, jobs.length); i++) {
+        for (let i = 0; i < Math.min(parallelNum, jobs.length); i++) {
             requestQueue(i);
         }
     });
