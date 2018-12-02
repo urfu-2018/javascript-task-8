@@ -14,24 +14,24 @@ const isStar = false;
  */
 async function runParallel(jobs, parallelNum/* timeout = 1000 */) {
     if (jobs.length === 0) {
-        return Promise.resolve([]);
+        return [];
     }
     const result = [];
-    while (jobs.length !== 0) {
-        const currentJobs = jobs.splice(0, parallelNum);
-        const currentResult = await Promise.all(currentJobs.map(doJob));
-        result.push(...currentResult);
-    }
+    let currentJobIndex = 0;
+    const worker = async () => {
+        while (result.length !== jobs.length) {
+            try {
+                const currentJob = jobs[currentJobIndex];
+                result[currentJobIndex] = await currentJob();
+            } catch (error) {
+                result[currentJobIndex] = error;
+            }
+            currentJobIndex++;
+        }
+    };
+    await Promise.all(new Array(parallelNum).fill(worker()));
 
     return result;
-}
-
-async function doJob(job) {
-    try {
-        return job();
-    } catch (error) {
-        return error;
-    }
 }
 
 module.exports = {
