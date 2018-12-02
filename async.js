@@ -21,12 +21,13 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         var index = 0;
         const translatedWordsArray = [];
         const requestQueue = (RequestQueueIndex) => {
+            index = index + 1;
             const makeTranslation = (item) => {
                 translatedWordsArray[RequestQueueIndex] = item;
                 if (jobs.length === translatedWordsArray.length) {
                     resolve(translatedWordsArray);
                 } else {
-                    requestQueue(++index);
+                    requestQueue(index);
                 }
             };
             new Promise((resolverTimeout) => {
@@ -34,7 +35,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                 jobs[RequestQueueIndex]().then(resolverTimeout)
                     .catch(resolverTimeout);
             })
-                .then(makeTranslation);
+                .then(makeTranslation, makeTranslation);
         };
         for (var i = 0; i < Math.min(parallelNum, jobs.length); i++) {
             requestQueue(i);
