@@ -19,24 +19,22 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             resolve([]);
         }
         const result = [];
-        let tmpIndex = 0;
-        let c = Math.min(jobs.length, parallelNum);
-        for (let i = 0; i < c; i++) {
-            doSomething(tmpIndex++);
+        let currentIndex = 0;
+        for (let i = 0; i < Math.min(jobs.length, parallelNum); i++) {
+            runJob(currentIndex++);
         }
 
-        async function doSomething(index) {
+        async function runJob(index) {
             const job = jobs[index];
             const timer = new Promise(reject => {
                 setTimeout(reject, timeout, new Error('Promise timeout'));
             });
-            result[index] = await Promise.race([job(), timer])
-                .then(resol => resol, err => err);
+            result[index] = await Promise.race([job(), timer]);
             if (result.length === jobs.length) {
                 resolve(result);
             }
             if (jobs.length > result.length) {
-                doSomething(tmpIndex++);
+                runJob(currentIndex++);
             }
         }
     });
