@@ -16,10 +16,15 @@ async function runParallel(jobs, parallelNum/* timeout = 1000 */) {
     if (jobs.length === 0) {
         return [];
     }
+    if (parallelNum > jobs.length || parallelNum <= 0) {
+        parallelNum = jobs.length;
+    }
+
     const result = [];
     let currentJobIndex = 0;
+
     const worker = async () => {
-        while (result.length !== jobs.length) {
+        while (result.length !== jobs.length && currentJobIndex < jobs.length) {
             try {
                 const currentJob = jobs[currentJobIndex];
                 result[currentJobIndex] = await currentJob();
@@ -29,7 +34,13 @@ async function runParallel(jobs, parallelNum/* timeout = 1000 */) {
             currentJobIndex++;
         }
     };
-    await Promise.all(new Array(parallelNum).fill(worker()));
+
+    const workers = [];
+    for (let i = 0; i < parallelNum; i++) {
+        workers.push(worker());
+    }
+
+    await Promise.all(workers);
 
     return result;
 }
