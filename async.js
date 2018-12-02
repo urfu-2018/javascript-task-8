@@ -19,16 +19,26 @@ function runParallel(jobs, parallelNum) {
         return Promise.resolve([]);
     }
 
-    let jobsArray = [];
+    const jobPackets = [];
     let index = 0;
     for (let i = 0; i < jobs.length; i += parallelNum) {
-        jobsArray[index] = jobs.slice(i, i + parallelNum);
+        jobPackets[index] = jobs.slice(i, i + parallelNum);
         index++;
     }
 
-    return Promise.all(jobsArray.map(jobsPacket =>
-        Promise.all(jobsPacket.map(job => nonFailPromise(job())))))
-        .then(results => [].concat(...results));
+    return new Promise((resolve) => {
+        let results = [];
+        jobPackets.reduce((acc, val) => acc
+            .then(() => executePacket(val))
+            .then(res => {
+                results = results.concat(res);
+            }), Promise.resolve())
+            .then(() => resolve(results));
+    });
+}
+
+function executePacket(jobsPacket) {
+    return Promise.all(jobsPacket.map(job => nonFailPromise(job())));
 }
 
 function nonFailPromise(promise) {
