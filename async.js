@@ -19,7 +19,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
     return new Promise(resolve => {
         const count = Math.min(jobs.length, parallelNum);
-        let translations = new Array(count);
+        let translations = [];
         let jobIndex = 0;
 
         const translate = id => {
