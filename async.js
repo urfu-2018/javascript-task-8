@@ -22,10 +22,10 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         let tmpIndex = 0;
         let c = Math.min(jobs.length, parallelNum);
         for (let i = 0; i < c; i++) {
-            doSomthing(tmpIndex);
+            doSomething(tmpIndex++);
         }
 
-        async function doSomthing(index) {
+        async function doSomething(index) {
             const job = jobs[index];
             const timer = new Promise(reject => {
                 setTimeout(reject, timeout, new Error());
@@ -35,7 +35,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                 return resolve(result);
             }
             if (result.length < jobs.length) {
-                doSomthing(tmpIndex++);
+                doSomething(tmpIndex++);
             }
         }
     });
