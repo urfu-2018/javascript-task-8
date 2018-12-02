@@ -20,21 +20,18 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     }
 
     const jobPackets = [];
-    let index = 0;
     for (let i = 0; i < jobs.length; i += parallelNum) {
-        jobPackets[index] = jobs.slice(i, i + parallelNum);
-        index++;
+        jobPackets.push(jobs.slice(i, i + parallelNum));
     }
 
-    return new Promise((resolve) => {
-        let results = [];
-        jobPackets.reduce((acc, val) => acc
-            .then(() => executePacket(val, timeout))
-            .then(res => {
-                results = results.concat(res);
-            }), Promise.resolve())
-            .then(() => resolve(results));
-    });
+    let results = [];
+
+    return jobPackets.reduce((acc, val) => acc
+        .then(() => executePacket(val, timeout))
+        .then(res => {
+            results = results.concat(res);
+        }), Promise.resolve())
+        .then(() => Promise.resolve(results));
 }
 
 function executePacket(jobsPacket, timeout) {
