@@ -1,4 +1,3 @@
-/* eslint-disable linebreak-style */
 'use strict';
 
 /**
@@ -8,22 +7,18 @@
 const isStar = true;
 
 /**
- * Добавляет к Promise таймаут. Если таймаутзакончился, то вернется resolve(Error)
- * @param {Number} ms - timeout
+ * Добавляет к Promise таймаут. Если таймаут закончился, то вернется reject(Error)
  * @param {Promise} promise - promise
+ * @param {Number} ms - timeout
  * @returns {Promise}
  */
-function promiseTimeout(ms, promise) {
-    let timeout = new Promise((resolve, reject) => {
-        let id = setTimeout(() => {
-            clearTimeout(id);
-            reject(new Error('Promise timeout'));
-        }, ms);
+function promiseTimeout(promise, ms) {
+    let timeoutPromise = new Promise((resolve, reject) => {
+        setTimeout(() => reject(new Error('Promise timeout')), ms);
     });
 
-    return Promise.race([promise, timeout]);
+    return Promise.race([promise, timeoutPromise]);
 }
-
 
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
@@ -38,11 +33,11 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
     return new Promise(resolve => {
         const results = new Array(jobs.length);
+        let count = Math.min(parallelNum, jobs.length);
         let finished = 0;
-        let count = 0;
 
-        for (count = 0; count < Math.min(parallelNum, jobs.length); count++) {
-            runPromise(count);
+        for (let i = 0; i < count; i++) {
+            runPromise(i);
         }
 
         function runPromise(num) {
@@ -55,7 +50,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                     runPromise(count++);
                 }
             };
-            promiseTimeout(timeout, jobs[num]())
+            promiseTimeout(jobs[num](), timeout)
                 .then(callback, callback);
         }
     });
