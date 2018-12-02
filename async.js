@@ -40,7 +40,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             return promise.then(addTranslation);
         };
 
-        while (jobIndex <= count) {
+        while (jobIndex < count) {
             translate(jobIndex++);
         }
     });
