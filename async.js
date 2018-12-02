@@ -33,7 +33,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             Promise.race([
                 job(),
                 new Promise(reject =>
-                    setTimeout(reject, timeout, new Error(`Promise timeout`)))
+                    setTimeout(reject, timeout, new Error('Promise timeout')))
             ])
                 .then(x => handleResult(x, index))
                 .catch(x => handleResult(x, index));
