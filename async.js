@@ -19,7 +19,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
         if (jobs.length === 0) {
             resolve([]);
-            
+
             return;
         }
 
@@ -30,9 +30,11 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         function run(index) {
             const job = jobs[index];
 
-            Promise.race([job(), new Promise(reject => setTimeout(reject, timeout, new Error('timeout promise')))])
-            .then(x => handleResult(x, index))
-            .catch(x => handleResult(x, index));
+            Promise.race([
+                job(),
+                new Promise(reject => setTimeout(reject, timeout, new Error('timeout promise')))])
+                .then(x => handleResult(x, index))
+                .catch(x => handleResult(x, index));
         }
 
         function handleResult(result, index) {
@@ -48,7 +50,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                 run(pointerJob++);
             }
         }
-    })
+    });
 }
 
 module.exports = {
