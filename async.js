@@ -14,7 +14,7 @@ const isStar = false;
  */
 // eslint-disable-next-line no-unused-vars
 function runParallel(jobs, parallelNum, timeout = 1000) {
-    if (!jobs.length || parallelNum < 1) {
+    if (!jobs.length) {
         return Promise.resolve([]);
     }
 
@@ -33,7 +33,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                 resultTranslate[counter] = res;
                 counter++;
 
-                startTranslate(anotherTranslate);
+                return startTranslate(anotherTranslate);
             });
     }
 
