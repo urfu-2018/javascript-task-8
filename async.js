@@ -37,29 +37,29 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         });
     }
 
-    function runJob(indexJob) {
+    async function runJob(indexJob) {
         return getJobPromise(indexJob)
             .then(result => {
                 results[indexJob] = result;
                 goNextOrQuit();
-            })
+            }, goNextOrQuit)
             .catch(result => {
                 results[indexJob] = result;
                 goNextOrQuit();
             });
     }
 
-    async function goNextOrQuit() {
+    function goNextOrQuit() {
         countFinished++;
         if (count < jobs.length) {
             runJob(count++);
         } else if (countFinished === jobs.length) {
-            end(results);
+            end();
         }
     }
 
-    function end(result) {
-        globalResolve(result);
+    function end() {
+        globalResolve(results);
     }
 }
 
