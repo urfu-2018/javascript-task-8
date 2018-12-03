@@ -15,13 +15,13 @@ const isStar = false;
 async function runParallel(jobs, parallelNum) {
     const queue = [];
     const result = [];
-    for (let job of jobs) {
+    for (let [index, job] of jobs.entries()) {
         const promise = job().then(resolve => {
             queue.splice(queue.indexOf(promise), 1);
-            result.push(resolve);
+            result[index] = resolve;
         }, resolve => {
             queue.splice(queue.indexOf(promise), 1);
-            result.push(resolve);
+            result[index] = resolve;
         });
         queue.push(promise);
         if (queue.length >= parallelNum) {
@@ -32,6 +32,7 @@ async function runParallel(jobs, parallelNum) {
 
     return result;
 }
+
 module.exports = {
     runParallel,
 
