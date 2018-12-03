@@ -13,24 +13,25 @@ const isStar = false;
  * @returns {Promise<Array>}
  */
 async function runParallel(jobs, parallelNum) {
+    const queue = [];
     const result = [];
-    const threads = [];
-    for (let i = 0; i < parallelNum && i < jobs.length; i++) {
-        threads.push(runThread());
-    }
-    await Promise.all(threads);
-
-    async function runThread() {
-        const index = result.length;
-        result[index] = await jobs[index]().then(value => value, error => error);
-        if (result.length < jobs.length) {
-            await runThread();
+    for (let job of jobs) {
+        const promise = job().then(resolve => {
+            queue.splice(queue.indexOf(promise), 1);
+            result.push(resolve);
+        }, resolve => {
+            queue.splice(queue.indexOf(promise), 1);
+            result.push(resolve);
+        });
+        queue.push(promise);
+        if (queue.length >= parallelNum) {
+            await Promise.race(queue);
         }
     }
+    await Promise.all(queue);
 
-    return new Promise((resolve) => resolve(result));
+    return result;
 }
-
 module.exports = {
     runParallel,
 
