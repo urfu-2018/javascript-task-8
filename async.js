@@ -44,9 +44,9 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             return translationPromises;
         }
 
-        function executeParallel(promisesGroup) {
+        async function executeParallel(promisesGroup) {
             for (const promise of promisesGroup) {
-                Promise.race([
+                await Promise.race([
                     promise,
                     new Promise(reject =>
                         setTimeout(reject, timeout, new Error('Promise timeout')))
