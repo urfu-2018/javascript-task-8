@@ -25,10 +25,11 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             run(i);
         }
         function run(num) {
+            started++;
             const callback = result => {
                 results[num] = result;
                 if (++finished !== jobs.length) {
-                    run(++started);
+                    run(started);
                 } else {
                     return resolve(results);
                 }
