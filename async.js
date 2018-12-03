@@ -13,7 +13,34 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
-    // асинхронная магия
+    return new Promise(function (resolve) {
+        if (!jobs.length) {
+            return Promise.resolve([]);
+        }
+        let translatedPhrases = [];
+        let currentPhrase = 0;
+
+        function startTranslating(indexPhrase) {
+            let timeoutPromise = new Promise(reject =>
+                setTimeout(reject, timeout, new Error('Promise timeout')));
+            Promise.race([jobs[indexPhrase](), timeoutPromise])
+                .then(current => translatingNext(current, indexPhrase));
+        }
+
+        function translatingNext(phrases, indexPhrase) {
+            translatedPhrases[indexPhrase] = phrases;
+            if (currentPhrase < jobs.length) {
+                startTranslating(currentPhrase++);
+            } else if (translatedPhrases.length === jobs.length) {
+                return resolve(translatedPhrases);
+            }
+        }
+
+        for (let i = 0; i < parallelNum; i++) {
+            startTranslating(currentPhrase++);
+        }
+
+    });
 }
 
 module.exports = {
