@@ -14,7 +14,7 @@ const isStar = false;
  */
 // eslint-disable-next-line no-unused-vars
 function runParallel(jobs, parallelNum, timeout = 1000) {
-    if (!jobs.length) {
+    if (!jobs.length || parallelNum < 1) {
         return Promise.resolve([]);
     }
 
