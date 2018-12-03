@@ -14,7 +14,10 @@ const isStar = true;
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
     return new Promise(resolve => {
-        const results = new Array(jobs.length);
+        if (!jobs) {
+            resolve([]);
+        }
+        let results = new Array(jobs.length);
         let finished = 0;
         let started = 0;
         for (var i = 0; i < Math.min(parallelNum, jobs.length); i++) {
