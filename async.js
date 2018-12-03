@@ -19,23 +19,35 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         return Promise.resolve([]);
     }
 
-    const jobPackets = [];
-    for (let i = 0; i < jobs.length; i += parallelNum) {
-        jobPackets.push(jobs.slice(i, i + parallelNum));
-    }
+    return new Promise((resolve) => {
+        let results = [];
 
-    let results = [];
+        let completeJobs = 0;
+        let index = 0;
 
-    return jobPackets.reduce((acc, val) => acc
-        .then(() => executePacket(val, timeout))
-        .then(res => {
-            results = results.concat(res);
-        }), Promise.resolve())
-        .then(() => Promise.resolve(results));
+        function handleJobEnd(id, result) {
+            results[id] = result;
+            completeJobs++;
+            if (completeJobs >= jobs.length) {
+                resolve(results);
+            } else {
+                runNextJob();
+            }
+        }
+
+        function runNextJob() {
+            executeJob(jobs[index], timeout).then(res => handleJobEnd(index, res));
+            index++;
+        }
+
+        for (let i = 0; i < Math.min(jobs.length, parallelNum); i++) {
+            runNextJob();
+        }
+    });
 }
 
-function executePacket(jobsPacket, timeout) {
-    return Promise.all(jobsPacket.map(job => nonFailPromise(timeoutPromise(job(), timeout))));
+function executeJob(job, timeout) {
+    return nonFailPromise(timeoutPromise(job(), timeout));
 }
 
 function timeoutPromise(promise, timeout) {
