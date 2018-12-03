@@ -31,7 +31,7 @@ function runParallel(jobs, parallelNum) {
                 if (results.length === jobs.length) {
                     return resolve(result);
                 }
-                if (jobIndex < jobs.length) {
+                if (currentJobIndex < jobs.length) {
                     doJob(currentJobIndex++);
                 }
             };
