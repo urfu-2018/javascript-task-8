@@ -6,25 +6,53 @@
  */
 const isStar = true;
 
-async function workerFunction(jobs, jobTimeout) {
-    const workerResult = [];
-    while (jobs.length > 0) {
-        const job = jobs.pop();
-        const jobIndex = jobs.length;
-        try {
-            const result = await setPromiseTimeout(job(), jobTimeout);
-            workerResult.push([result, jobIndex]);
-        } catch (error) {
-            workerResult.push([error, jobIndex]);
+class WorkersPool {
+    constructor(jobs, workersCount, jobTimeout) {
+        this.jobs = jobs;
+        this.jobTimeout = jobTimeout;
+        this.jobIndex = 0;
+
+        this.workers = [];
+
+        for (let i = 0; i < workersCount; i++) {
+            this.workers.push(this.workerFunction());
         }
     }
 
-    return workerResult;
+    async workerFunction() {
+        const result = [];
+        while (this.jobIndex < this.jobs.length) {
+            const job = this.jobs[this.jobIndex];
+            const index = this.jobIndex;
+            this.jobIndex++;
+            try {
+                const jobResult = await setPromiseTimeout(job(), this.jobTimeout);
+                result.push([jobResult, index]);
+            } catch (error) {
+                result.push([error, index]);
+            }
+        }
+
+        return result;
+    }
+
+    async run() {
+        const totalResult = [];
+        const workersResult = await Promise.all(this.workers);
+        workersResult.forEach(resultArray => {
+            resultArray.forEach(([result, jobIndex]) => {
+                totalResult[jobIndex] = result;
+            });
+        });
+
+        return totalResult;
+    }
 }
+
 
 function setPromiseTimeout(promise, timeout) {
     return new Promise((resolve, reject) => {
-        const timeoutID = setTimeout(() => reject(new Error('Promise timeout')), timeout);
+        const timeoutID = setTimeout(reject, timeout, new Error('Promise timeout'));
         promise
             .then(result => {
                 clearTimeout(timeoutID);
@@ -44,22 +72,7 @@ async function runParallel(jobs, parallelNum, timeout = 1000) {
         return [];
     }
 
-    const totalResult = [];
-    const workers = [];
-    jobs.reverse();
-    for (let i = 0; i < parallelNum; i++) {
-        workers.push(workerFunction(jobs, timeout));
-    }
-
-    const workersResult = await Promise.all(workers);
-    workersResult.forEach(resultArray => {
-        resultArray.forEach(([result, jobIndex]) => {
-            totalResult[jobIndex] = result;
-        });
-    });
-    totalResult.reverse();
-
-    return totalResult;
+    return new WorkersPool(jobs, parallelNum, timeout).run();
 }
 
 module.exports = {
