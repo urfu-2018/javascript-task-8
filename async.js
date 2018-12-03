@@ -29,7 +29,8 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
         function startPromise(jobIndex) {
             return handler(jobIndex)
-                .then(resolve1 => finishPromise(resolve1, jobIndex));
+                .then(resolve1 => finishPromise(resolve1, jobIndex))
+                .catch(resolve1 => finishPromise(resolve1, jobIndex));
         }
 
         function handler(jobIndex) {
