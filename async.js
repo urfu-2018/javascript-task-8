@@ -15,13 +15,12 @@ function runParallel(jobs, parallelNum) {
     const result = [];
     let index = 0;
     const promise = i => new Promise(resolve => {
-        if (jobs.length === 0) {
+        if (index >= jobs.length) {
             resolve();
         } else {
-            result[i] = jobs.shift()()
+            result[i] = jobs[i]()
                 .catch(x => x);
-            index++;
-            promise(index);
+            promise(++index);
             resolve();
         }
     });
