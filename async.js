@@ -16,6 +16,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     let results = new Array(jobs.length);
     let count = 0;
     let globalResolve;
+    let countAAA = 0;
 
     if (jobs.length === 0) {
         return [];
@@ -28,7 +29,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         }
     });
 
-    async function getJobPromise(indexJob) {
+    async function fff(indexJob) {
         return new Promise((resolve, reject) => {
             jobs[indexJob]()
                 .then(resolve);
@@ -37,7 +38,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     }
 
     function runJob(indexJob) {
-        return getJobPromise(indexJob)
+        return fff(indexJob)
             .then(result => {
                 results[indexJob] = result;
             })
@@ -49,9 +50,10 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     }
 
     async function goNextOrQuit() {
+        countAAA++;
         if (count < jobs.length) {
             runJob(count++);
-        } else {
+        } else if (countAAA === jobs.length) {
             end(results);
         }
     }
