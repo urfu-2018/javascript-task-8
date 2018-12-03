@@ -12,7 +12,7 @@ const isStar = true;
  * @param {Number} timeout - таймаут работы промиса
  * @returns {Promise<Array>}
  */
-function runParallel(jobs, parallelNum, timeout = 1000) {
+async function runParallel(jobs, parallelNum, timeout = 1000) {
     let results = new Array(jobs.length);
     let count = 0;
     let globalResolve;
@@ -49,7 +49,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             });
     }
 
-    async function goNextOrQuit() {
+    function goNextOrQuit() {
         countFinished++;
         if (count < jobs.length) {
             runJob(count++);
