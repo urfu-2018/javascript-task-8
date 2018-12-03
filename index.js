@@ -23,10 +23,17 @@ const languages = ['be', 'uk', 'en', 'fr', 'de', 'it', 'pl', 'tr', 'th', 'ja'];
 const text = 'дайте мне воды';
 
 const jobs = languages.map(language => createTranslationJob(language, text));
-
+let asldk;
+createTranslationJob('en', 'дайте мне воды')().then(res => {
+    asldk = res;
+    console.info(asldk.body.text);
+});
 async
     .runParallel(jobs, 2)
-    .then(result => result.map(item => item instanceof Error ? item : item.body.text[0]))
+    .then(result => {
+        return result.map(item => item instanceof Error ? item : item.body.text[0]);
+    }
+    )
     .then(translations => translations.join('\n'))
     .then(console.info);
 
