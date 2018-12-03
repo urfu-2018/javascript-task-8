@@ -21,6 +21,8 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
         if (jobs.length === 0 || parallelNum <= 0) {
             resolve([]);
+
+            return;
         }
 
         while (startedCount < parallelNum) {
