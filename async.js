@@ -20,8 +20,8 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
         const doneJobs = [];
         let currentIndex = 0;
-        const doJob = async function (jobIndex) {
-            await executeWithTimeout(doneJobs, jobs[jobIndex], jobIndex, timeout);
+        const doJob = async jobIndex => {
+            doneJobs[jobIndex] = await executeWithTimeout(jobs[jobIndex], timeout);
 
             if (doneJobs.length === jobs.length) {
                 resolve(doneJobs);
@@ -38,13 +38,13 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     });
 }
 
-async function executeWithTimeout(doneJobs, currentJob, index, timeout) {
+function executeWithTimeout(currentJob, timeout) {
     const timeoutPromise = new Promise((resolve, reject) =>
         setTimeout(reject, timeout, new Error('Promise timeout'))
     );
 
-    doneJobs[index] = Promise
-        .race([await currentJob(), timeoutPromise])
+    return Promise
+        .race([currentJob(), timeoutPromise])
         .then(resolve => resolve, reject => reject);
 }
 
