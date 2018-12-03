@@ -18,16 +18,16 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             resolve([]);
         }
         for (let i = 0; i < parallelNum; i++) {
-            count += 1;
+            let count += 1;
             runJobsFunction(jobs[count - 1], count - 1);
         }
 
-        function runJobsFunction(job, jobIndex) {
-            const funcToEmit = currentResult => endOfWork(currentResult, jobIndex);
+        function runJobsFunction(job, index) {
+            const final = currentResult => endOfWork(currentResult, index);
 
             Promise.race([job(), new Promise((resolveForError) =>
                 setTimeout(resolveForError, timeout, new Error()))])
-                .then(funcToEmit, funcToEmit);
+                .then(final,final);
         }
 
         function endOfWork(result, index) {
