@@ -37,19 +37,19 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         });
     }
 
-    async function runJob(indexJob) {
+    function runJob(indexJob) {
         return getJobPromise(indexJob)
             .then(result => {
                 results[indexJob] = result;
                 goNextOrQuit();
-            }, goNextOrQuit)
+            })
             .catch(result => {
                 results[indexJob] = result;
                 goNextOrQuit();
             });
     }
 
-    function goNextOrQuit() {
+    async function goNextOrQuit() {
         countFinished++;
         if (count < jobs.length) {
             runJob(count++);
@@ -62,6 +62,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         globalResolve(results);
     }
 }
+
 
 module.exports = {
     runParallel,
