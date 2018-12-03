@@ -39,8 +39,8 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
         function raceJobs(currentResult, jobIndex) {
             Promise.race([
-                jobs[jobIndex](),
-                new Promise((_, reject) => setTimeout(reject, timeout))
+                jobs[jobIndex](), new Promise((_, reject) =>
+                    setTimeout(reject, timeout, new Error('Promise timeout')))
             ]).then(currentResult, currentResult);
         }
     });
