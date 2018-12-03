@@ -27,6 +27,7 @@ function runParallel(jobs, parallelNum) {
 
     for (let i = 0; i < parallelNum && i < jobs.length; i++) {
         promise(i);
+        index++;
     }
 
     return Promise.all(result);
