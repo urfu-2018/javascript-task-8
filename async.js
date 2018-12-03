@@ -12,30 +12,32 @@ const isStar = false;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum) {
+    const result = [];
+    let index = 0;
 
     return new Promise(resolve => {
-        const result = [];
-        if (!jobs.length) {
-            resolve(result);
-        }
-        let index = 0;
-
-        async function begin() {
+        const begin = () => {
             if (index >= jobs.length) {
                 resolve(result);
             } else {
-                result[index] = await jobs[index]()
-                    .catch(x => x);
-                begin();
-                index++;
+                jobs[index]()
+                    .then(y => {
+                        result[index] = y;
+                    },
+                    y => {
+                        result[index] = y;
+                    })
+                    .then(() => {
+                        index++;
+                    })
+                    .then(begin);
             }
-        }
+        };
+
         for (let i = 0; i < parallelNum && i < jobs.length; i++) {
             begin();
-            index++;
         }
     });
-
 }
 
 module.exports = {
