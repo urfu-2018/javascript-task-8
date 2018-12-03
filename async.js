@@ -64,7 +64,7 @@ function setPromiseTimeout(promise, timeout) {
  * @param {Number} timeout - таймаут работы промиса
  * @returns {Promise<Array>}
  */
-async function runParallel(jobs, parallelNum, timeout = 10) {
+async function runParallel(jobs, parallelNum, timeout = 1000) {
     if (jobs.length === 0) {
         return [];
     }
