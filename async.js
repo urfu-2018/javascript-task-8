@@ -24,18 +24,18 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
         const begin = () => {
             if (curIndex < jobs.length) {
+                curIndex++;
                 new Promise((resolve, reject) => {
                     setTimeout(() => reject(new Error('Promise timeout')), timeout);
-                    jobs[curIndex]().then(resolve, reject);
+                    jobs[curIndex - 1]().then(resolve, reject);
                 }).then(x => {
-                    result[curIndex] = x;
+                    result[curIndex - 1] = x;
                 },
                 x => {
-                    result[curIndex] = x;
+                    result[curIndex - 1] = x;
                 })
                     .then(() => finishedJobs++)
                     .then(begin);
-                curIndex++;
             }
             if (finishedJobs === jobs.length) {
                 commonResolve(result);
