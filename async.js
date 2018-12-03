@@ -34,7 +34,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                     return resolve(results);
                 }
 
-                if (jobNum < jobs.length) {
+                if (jobNumber < jobs.length) {
                     runNextJob(jobNumber++);
                 }
             }
