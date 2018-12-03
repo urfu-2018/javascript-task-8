@@ -40,6 +40,10 @@ function setPromiseTimeout(promise, timeout) {
  * @returns {Promise<Array>}
  */
 async function runParallel(jobs, parallelNum, timeout = 1000) {
+    if (jobs.length === 0) {
+        return [];
+    }
+
     const totalResult = [];
     const workers = [];
     jobs.reverse();
