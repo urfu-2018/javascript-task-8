@@ -52,7 +52,7 @@ class WorkersPool {
 
 function setPromiseTimeout(promise, timeout) {
     const timerPromise = new Promise((resolve, reject) => {
-        setTimeout(reject, timeout, new Error('Promise Timeout'));
+        setTimeout(reject, timeout, new Error('Promise timeout'));
     });
 
     return Promise.race([promise, timerPromise]);
@@ -64,7 +64,7 @@ function setPromiseTimeout(promise, timeout) {
  * @param {Number} timeout - таймаут работы промиса
  * @returns {Promise<Array>}
  */
-async function runParallel(jobs, parallelNum, timeout = 1000) {
+async function runParallel(jobs, parallelNum, timeout = 10) {
     if (jobs.length === 0) {
         return [];
     }
