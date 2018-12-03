@@ -13,13 +13,13 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
-    const result = [];
+    let result = [];
     let startedJobsCount = 0;
     let finishedJobsCount = 0;
 
     return new Promise(resolve => {
         if (jobs.length === 0) {
-            resolve([]);
+            resolve(result);
         }
 
         while (startedJobsCount < parallelNum) {
@@ -31,9 +31,10 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         let handler = jobResult => finish(jobResult, job, resolve);
 
         return new Promise((resolveJob, rejectJob) => {
-            jobs[job]().then(resolveJob, rejectJob);
+            jobs[job]()
+                .then(resolveJob, rejectJob);
 
-            setTimeout(() => rejectJob(new Error()), timeout);
+            setTimeout(() => rejectJob(new Error('Promise timeout')), timeout);
         })
             .then(handler)
             .catch(handler);
