@@ -13,13 +13,19 @@ const isStar = false;
  * @returns {Promise<Array>}
  */
 async function runParallel(jobs, parallelNum) {
-    console.info(parallelNum);
-    if (!jobs.length) {
-        return new Promise((resolve) => resolve([]));
-    }
     const result = [];
-    for (const job of jobs) {
-        result.push(await job().then(x => x, y => y));
+    const threads = [];
+    for (let i = 0; i < parallelNum && i < jobs.length; i++) {
+        threads.push(runThread());
+    }
+    await Promise.all(threads);
+
+    async function runThread() {
+        const index = result.length;
+        result[index] = await jobs[index]().then(value => value, error => error);
+        if (result.length < jobs.length) {
+            await runThread();
+        }
     }
 
     return new Promise((resolve) => resolve(result));
