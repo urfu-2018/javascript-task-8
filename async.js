@@ -15,11 +15,11 @@ function runParallel(jobs, parallelNum) {
     const result = [];
     let currentJobIndex = 0;
     let finishedJobsCount = 0;
-
+    if (!jobs.length || parallelNum === 0) {
+        return Promise.resolve(result);
+    }
     return new Promise(resolve => {
-        if (jobs.length === 0 || parallelNum === 0) {
-            resolve(result);
-        }
+
         const begin = () => {
             if (finishedJobsCount >= jobs.length) {
                 resolve(result);
