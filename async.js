@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализована остановка промиса по таймауту
  */
-const isStar = false;
+const isStar = true;
 
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
@@ -12,37 +12,52 @@ const isStar = false;
  * @param {Number} timeout - таймаут работы промиса
  * @returns {Promise<Array>}
  */
-async function runParallel(jobs, parallelNum/* timeout = 1000 */) {
-    if (jobs.length === 0) {
+async function runParallel(jobs, parallelNum, timeout = 1000) {
+    if (!jobs.length) {
         return [];
     }
-    if (parallelNum > jobs.length || parallelNum <= 0) {
-        parallelNum = jobs.length;
-    }
+
+    parallelNum = Math.min(parallelNum, jobs.length);
 
     const result = [];
     let currentJobIndex = 0;
 
-    const worker = async () => {
-        while (result.length < jobs.length && currentJobIndex < jobs.length) {
-            try {
-                const currentJob = jobs[currentJobIndex];
-                result[currentJobIndex] = await currentJob();
-            } catch (error) {
-                result[currentJobIndex] = error;
-            }
-            currentJobIndex++;
+    const doJob = async (jobIndex) => {
+        const job = jobs[jobIndex];
+        try {
+            result[jobIndex] = await runWithTimeout(job, timeout);
+        } catch (error) {
+            result[jobIndex] = error;
+        }
+
+        if (result.length === jobs.length) {
+            return;
+        }
+
+        if (currentJobIndex < jobs.length) {
+            await doJob(currentJobIndex++);
         }
     };
 
-    const workers = [];
+    const asyncJobs = [];
     for (let i = 0; i < parallelNum; i++) {
-        workers.push(worker());
+        asyncJobs.push(doJob(currentJobIndex++));
     }
 
-    await Promise.all(workers);
+    await Promise.all(asyncJobs);
 
     return result;
+}
+
+function runWithTimeout(job, timeout) {
+    const timer = new Promise(resolve => {
+        setTimeout(resolve, timeout, new Error('Promise timeout'));
+    });
+
+    return Promise.race([
+        job(),
+        timer
+    ]);
 }
 
 module.exports = {
