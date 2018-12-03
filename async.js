@@ -12,8 +12,14 @@ const isStar = false;
  * @param {Number} timeout - таймаут работы промиса
  * @returns {Promise<Array>}
  */
-function runParallel(jobs, parallelNum) {
-    return Promise.all(jobs.map(x => x()), parallelNum);
+async function runParallel(jobs, parallelNum) {
+    console.info(parallelNum);
+    const result = [];
+    for (const job of jobs) {
+        result.push(await (job()));
+    }
+
+    return new Promise((resolve) => resolve(result));
 }
 
 module.exports = {
