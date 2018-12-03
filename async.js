@@ -13,6 +13,8 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum = 1, timeout = 1000) {
+    console.info(parallelNum);
+
     return jobs.reduce((chain, job) => {
         return chain.then(chainResult =>
             createRace(job(), timeout).then(jobResult => [...chainResult, jobResult])
