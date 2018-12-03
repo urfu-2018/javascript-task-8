@@ -19,7 +19,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
     return new Promise(resolve => {
         if (jobs.length === 0) {
-            resolve(result);
+            resolve([]);
         }
 
         while (startedJobsCount < parallelNum) {
