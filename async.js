@@ -13,16 +13,11 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum = 1, timeout = 1000) {
-    let parallelJobs = [];
-    while (jobs.length > 0) {
-        parallelJobs = parallelJobs.concat([jobs.splice(0, parallelNum)]);
-    }
-
-    let a = parallelJobs.map(
-        thread => Promise.all(thread.map(job => createRace(job(), timeout)))
-            .then(result => result));
-
-    return Promise.all(a).then(result => [].concat(...result));
+    return jobs.reduce((chain, job) => {
+        return chain.then(chainResult =>
+            createRace(job(), timeout).then(jobResult => [...chainResult, jobResult])
+        );
+    }, Promise.resolve([]));
 }
 
 function createRace(promise, timeout) {
