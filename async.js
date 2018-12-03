@@ -25,7 +25,8 @@ function runParallel(jobs, parallelNum) {
                 resolve(result);
             }
             if (currentJobIndex < jobs.length) {
-                jobs[currentJobIndex++]()
+                currentJobIndex++;
+                jobs[currentJobIndex - 1]()
                     .then(x => {
                         result[currentJobIndex - 1] = x;
                     },
