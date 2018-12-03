@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализована остановка промиса по таймауту
  */
-const isStar = true;
+const isStar = false;
 
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
@@ -21,8 +21,9 @@ function runParallel(jobs, parallelNum) {
     let globalIndex = 0;
     let currentJobs = [];
     const jobsWithIndex = jobs.map((job, i) => ({ job, i }));
+    const taskListCompleted = Array.from(Array(jobsWithIndex.length).keys()).map(() => false);
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
         if (jobs.length <= parallelNum) {
             currentJobs.push(...jobsWithIndex);
         } else {
@@ -30,35 +31,41 @@ function runParallel(jobs, parallelNum) {
         }
 
         const next = () => {
-            if (globalIndex >= jobsWithIndex.length) {
-                resolve(jobsResult);
+            if (globalIndex >= jobs.length) {
+                if (taskListCompleted.every(item => item)) {
+                    resolve(jobsResult);
+                }
 
                 return;
             }
             const { job, i } = jobsWithIndex[globalIndex];
             job()
-                .then((result) => {
+                .then(result => {
                     jobsResult[i] = result;
                     globalIndex++;
+                    taskListCompleted[i] = true;
                     next();
                 })
-                .catch((error) => {
+                .catch(error => {
                     jobsResult[i] = error;
                     globalIndex++;
+                    taskListCompleted[i] = true;
                     next();
                 });
         };
 
-        const startWork = (tasks) => {
+        const startWork = tasks => {
             globalIndex = tasks.length;
             tasks.forEach(({ job, i }) => {
                 job()
-                    .then((result) => {
+                    .then(result => {
                         jobsResult[i] = result;
+                        taskListCompleted[i] = true;
                         next();
                     })
-                    .catch((error) => {
+                    .catch(error => {
                         jobsResult[i] = error;
+                        taskListCompleted[i] = true;
                         next();
                     });
             });
