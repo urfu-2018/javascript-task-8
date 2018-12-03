@@ -16,6 +16,9 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     // асинхронная магия
     return new Promise(resolve => {
         const result = [];
+        if (!jobs.length) {
+            resolve(result);
+        }
         let currentJobIndex = 0;
         for (let i = 0; i < Math.min(jobs.length, parallelNum); i++) {
             runCurrentJob();
