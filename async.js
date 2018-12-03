@@ -26,6 +26,10 @@ function runParallel(jobs, parallelNum) {
                     result.push(x);
 
                     return result;
+                }, x => {
+                    result.push(x);
+
+                    return result;
                 });
 
             return Promise.resolve(pr);
