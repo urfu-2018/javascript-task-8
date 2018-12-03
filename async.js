@@ -18,9 +18,11 @@ function runParallel(jobs, parallelNum = 1, timeout = 1000) {
         parallelJobs = parallelJobs.concat([jobs.splice(0, parallelNum)]);
     }
 
-    return Promise.all(parallelJobs.map(
-        async thread => await Promise.all(thread.map(job => createRace(job(), timeout)))))
-        .then(result => [].concat(...result));
+    let a = parallelJobs.map(
+        thread => Promise.all(thread.map(job => createRace(job(), timeout)))
+            .then(result => result));
+
+    return Promise.all(a).then(result => [].concat(...result));
 }
 
 function createRace(promise, timeout) {
