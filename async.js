@@ -6,40 +6,29 @@
  */
 const isStar = false;
 
-const toResultObject = (promise) => {
-    return promise
-        .then(result => ({ success: true, result }))
-        .catch(error => ({ success: false, result: error }));
-};
-
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
  * @param {Number} parallelNum - число одновременно исполняющихся промисов
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum) {
-    let promise = new Promise((x) => x([]));
-    if (jobs.length === 0) {
-        return Promise.resolve(promise);
-    }
-    // асинхронная магия
+    const result = [];
+    const promise = () => new Promise(resolve => {
+        if (jobs.length === 0) {
+            resolve();
+        } else {
+            let e = jobs.shift()().catch(x=>x);
+            result.push(e);
+            promise();
+            resolve();
+        }
+    });
 
-    for (let i = 0; i < jobs.length; i += parallelNum) {
-        promise = promise.then(result => {
-            let values = jobs.splice(0, parallelNum);
-            let pr = Promise.all(values.map(x => toResultObject(x())))
-                .then(x => {
-                    x.forEach(y => result.push(y.result));
-
-                    return result;
-                });
-
-            return Promise.resolve(pr);
-        });
-
+    for (let i = 0; i < parallelNum && i < jobs.length; i++) {
+        promise();
     }
 
-    return promise;
+    return Promise.all(result.map(x=>x.catch(x)));
 }
 
 module.exports = {
