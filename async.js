@@ -18,7 +18,7 @@ function runParallel(jobs, parallelNum) {
     }
 
     const result = [];
-    let error = null;
+    // let error = null;
 
     const run = async () => {
         for (let i = 0; i < jobs.length; i += parallelNum) {
@@ -30,18 +30,20 @@ function runParallel(jobs, parallelNum) {
                 );
                 result.push(...values);
             } catch (err) {
-                error = err;
-                break;
+                result.push(err);
+                // break;
             }
         }
 
-        return new Promise((resolve, reject) => {
-            if (error) {
-                reject([error]);
-            } else {
-                resolve(result);
-            }
-        });
+        return Promise.resolve(result);
+        //
+        // return new Promise((resolve, reject) => {
+        //     if (error) {
+        //         reject(error);
+        //     } else {
+        //         resolve(result);
+        //     }
+        // });
     };
 
     return run();
