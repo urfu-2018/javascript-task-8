@@ -6,6 +6,12 @@
  */
 const isStar = false;
 
+const toResultObject = (promise) => {
+    return promise
+        .then(result => ({ success: true, result }))
+        .catch(error => ({ success: false, result: error }));
+};
+
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
  * @param {Number} parallelNum - число одновременно исполняющихся промисов
@@ -21,13 +27,9 @@ function runParallel(jobs, parallelNum) {
     for (let i = 0; i < jobs.length; i += parallelNum) {
         promise = promise.then(result => {
             let values = jobs.splice(0, parallelNum);
-            let pr = Promise.all(values.map(x => x()))
+            let pr = Promise.all(values.map(x => toResultObject(x())))
                 .then(x => {
-                    result.push(x);
-
-                    return result;
-                }, x => {
-                    result.push(x);
+                    x.forEach(y => result.push(y.result));
 
                     return result;
                 });
