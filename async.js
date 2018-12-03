@@ -13,6 +13,9 @@ const isStar = false;
  */
 function runParallel(jobs, parallelNum) {
     const result = [];
+    if (jobs.length === 0) {
+        return Promise.resolve(result);
+    }
     let index = 0;
     const promise = i => new Promise(resolve => {
         if (index >= jobs.length) {
