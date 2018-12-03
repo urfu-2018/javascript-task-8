@@ -42,7 +42,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             Promise.race([
                 jobs[jobNum](),
                 new Promise((_, reject) => {
-                    setTimeout(reject, timeout, new Error('Timeout error'));
+                    setTimeout(reject, timeout, new Error('Promise timeout'));
                 })
             ]).then(handleResult, handleResult);
         }
