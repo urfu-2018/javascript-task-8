@@ -14,7 +14,7 @@ const isStar = false;
  */
 function runParallel(jobs, parallelNum) {
     return new Promise(resolve => {
-        if (jobs.length === 0) {
+        if (!jobs.length) {
             return resolve([]);
         }
 
@@ -29,7 +29,7 @@ function runParallel(jobs, parallelNum) {
             return function (result) {
                 results[jobIndex] = result;
                 if (results.length === jobs.length) {
-                    return resolve(result);
+                    return resolve(results);
                 }
                 if (currentJobIndex < jobs.length) {
                     doJob(currentJobIndex++);
