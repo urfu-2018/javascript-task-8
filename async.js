@@ -29,14 +29,15 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             results[id] = result;
             completeJobs++;
             if (completeJobs >= jobs.length) {
-                resolve(results);
+                return resolve(results);
             } else if (index < jobs.length) {
                 runNextJob();
             }
         }
 
         function runNextJob() {
-            executeJob(jobs[index], timeout).then(res => handleJobEnd(index, res));
+            const savedIndex = index;
+            executeJob(jobs[savedIndex], timeout).then(res => handleJobEnd(savedIndex, res));
             index++;
         }
 
