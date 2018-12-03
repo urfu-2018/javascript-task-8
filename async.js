@@ -19,6 +19,9 @@ async function errorAfterTimeout(timeout) {
 async function execute(jobs, jobTaskIds, jobResults, timeout) {
     while (jobTaskIds.length > 0) {
         const id = jobTaskIds.shift();
+        if (id === undefined) {
+            break;
+        }
         try {
             jobResults[id] = await runWithTimeout(jobs[id], timeout);
         } catch (error) {
