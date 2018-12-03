@@ -13,30 +13,34 @@ const isStar = false;
  */
 function runParallel(jobs, parallelNum) {
     const result = [];
-    let index = 0;
+    let currentJobIndex = 0;
+    let finishedJobsCount = 0;
 
     return new Promise(resolve => {
+        if (jobs.length === 0 || parallelNum === 0) {
+            resolve(result);
+        }
         const begin = () => {
-            if (index >= jobs.length) {
+            if (finishedJobsCount >= jobs.length) {
                 resolve(result);
-            } else {
-                jobs[index]()
-                    .then(y => {
-                        result[index] = y;
+            }
+            if (currentJobIndex < jobs.length) {
+                jobs[currentJobIndex++]()
+                    .then(x => {
+                        result[currentJobIndex] = x;
                     },
-                    y => {
-                        result[index] = y;
+                    x => {
+                        result[currentJobIndex] = x;
                     })
-                    .then(() => {
-                        index++;
-                    })
+                    .then(() => finishedJobsCount++)
                     .then(begin);
             }
         };
 
-        for (let i = 0; i < parallelNum && i < jobs.length; i++) {
+        for (let i = 0; i < jobs.length && i < parallelNum; i++) {
             begin();
         }
+
     });
 }
 
