@@ -12,7 +12,7 @@ function runWithTimeout(promise, timeout) {
 
 async function errorAfterTimeout(timeout) {
     return await new Promise(resolve =>
-        setTimeout(() => resolve(new Error('So long')), timeout)
+        setTimeout(() => resolve(new Error('Promise timeout')), timeout)
     );
 }
 
