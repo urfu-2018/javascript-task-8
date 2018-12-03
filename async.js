@@ -17,7 +17,9 @@ function runParallel(jobs, parallelNum = 1, timeout = 1000) {
 
     return jobs.reduce((chain, job) => {
         return chain.then(chainResult =>
-            createRace(job(), timeout).then(jobResult => [...chainResult, jobResult])
+            createRace(job(), timeout)
+                .then(jobResult => [...chainResult, jobResult])
+                .catch(err => [...chainResult, err])
         );
     }, Promise.resolve([]));
 }
