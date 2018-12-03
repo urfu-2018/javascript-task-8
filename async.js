@@ -13,22 +13,24 @@ const isStar = false;
  */
 function runParallel(jobs, parallelNum) {
     const result = [];
-    const promise = () => new Promise(resolve => {
+    let index = 0;
+    const promise = i => new Promise(resolve => {
         if (jobs.length === 0) {
             resolve();
         } else {
-            let e = jobs.shift()().catch(x=>x);
-            result.push(e);
-            promise();
+            result[i] = jobs.shift()()
+                .catch(x => x);
+            index++;
+            promise(index);
             resolve();
         }
     });
 
     for (let i = 0; i < parallelNum && i < jobs.length; i++) {
-        promise();
+        promise(i);
     }
 
-    return Promise.all(result.map(x=>x.catch(x)));
+    return Promise.all(result);
 }
 
 module.exports = {
