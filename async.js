@@ -30,7 +30,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             completeJobs++;
             if (completeJobs >= jobs.length) {
                 resolve(results);
-            } else {
+            } else if (index < jobs.length) {
                 runNextJob();
             }
         }
