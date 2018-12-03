@@ -18,19 +18,21 @@ function runParallel(jobs, parallelNum) {
         if (!jobs.length) {
             resolve(result);
         }
+        let index = 0;
 
-        async function begin(index) {
+        async function begin() {
             if (index >= jobs.length) {
                 resolve(result);
             } else {
                 result[index] = await jobs[index]()
                     .catch(x => x);
-                begin(index + 1);
+                begin();
+                index++;
             }
         }
-
         for (let i = 0; i < parallelNum && i < jobs.length; i++) {
-            begin(i);
+            begin();
+            index++;
         }
     });
 
