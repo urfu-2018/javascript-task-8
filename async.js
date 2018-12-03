@@ -12,30 +12,59 @@ const isStar = true;
  * @param {Number} timeout - таймаут работы промиса
  * @returns {Promise<Array>}
  */
-function runParallel(jobs, parallelNum, timeout = 1000) {
+function runParallel(jobs, parallelNum) {
     if (jobs.length === 0) {
         return Promise.resolve([]);
     }
 
-    return new Promise(resolve => {
-        let jobsResult = [];
-        let jobId = 0;
-        while (jobId < parallelNum) {
-            doJob(jobId++);
+    let jobsResult = [];
+    let globalIndex = 0;
+    let currentJobs = [];
+    const jobsWithIndex = jobs.map((job, i) => ({ job, i }));
+
+    return new Promise((resolve) => {
+        if (jobs.length <= parallelNum) {
+            currentJobs.push(...jobsWithIndex);
+        } else {
+            currentJobs.push(...jobsWithIndex.slice(0, parallelNum));
         }
 
-        async function doJob(index) {
-            const currentJob = jobs[index];
-            const timer = new Promise((_, reject) =>
-                setTimeout(reject, timeout, new Error('Promise timeout')));
-            jobsResult[index] = Promise.race([currentJob(), timer]).then(res => res, er => er);
-            if (jobsResult.length === jobs.length) {
+        const next = () => {
+            if (globalIndex >= jobsWithIndex.length) {
                 resolve(jobsResult);
+
+                return;
             }
-            if (jobId < jobs.length) {
-                doJob(jobId++);
-            }
-        }
+            const { job, i } = jobsWithIndex[globalIndex];
+            job()
+                .then((result) => {
+                    jobsResult[i] = result;
+                    globalIndex++;
+                    next();
+                })
+                .catch((error) => {
+                    jobsResult[i] = error;
+                    globalIndex++;
+                    next();
+                });
+        };
+
+        const startWork = (tasks) => {
+            globalIndex = tasks.length;
+            tasks.forEach(({ job, i }) => {
+                job()
+                    .then((result) => {
+                        jobsResult[i] = result;
+                        next();
+                    })
+                    .catch((error) => {
+                        jobsResult[i] = error;
+                        next();
+                    });
+            });
+        };
+
+        startWork(currentJobs);
     });
 }
 
