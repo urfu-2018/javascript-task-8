@@ -18,23 +18,21 @@ function runParallel(jobs, parallelNum) {
         if (!jobs.length) {
             resolve(result);
         }
-        let index = 0;
-        const begin = () => {
+
+        async function begin(index) {
             if (index >= jobs.length) {
                 resolve(result);
             } else {
-                result[index] = jobs[index]()
+                result[index] = await jobs[index]()
                     .catch(x => x);
-                index++;
-                begin();
+                begin(index + 1);
             }
-        };
+        }
 
         for (let i = 0; i < parallelNum && i < jobs.length; i++) {
-            begin();
-            index++;
+            begin(i);
         }
-    }).then(x=>Promise.all(x));
+    });
 
 }
 
