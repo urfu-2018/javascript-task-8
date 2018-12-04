@@ -19,7 +19,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         }
         let results = [];
         let startIndex = 0;
-        for (; startIndex < jobs.length; startIndex++) {
+        for (; startIndex < parallelNum; startIndex++) {
             startJob(startIndex);
         }
 
@@ -36,6 +36,9 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
         function finishJob(jobResult, jobIndex) {
             results[jobIndex] = jobResult;
+            if (startIndex < jobs.length) {
+                startJob(startIndex++);
+            }
             if (results.length === jobs.length) {
                 resolve(results);
             }
