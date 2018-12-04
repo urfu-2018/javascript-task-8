@@ -22,14 +22,14 @@ async function runParallel(jobs, parallelNum, timeout = 1000) {
 
     for (const [index, job] of jobs.entries()) {
         const promise = Promise.race([
-            job().then(
-                resolve => jobDone(resolve, promise, index),
-                error => jobDone(error, promise, index)
-            ),
+            job(),
             new Promise(resolve => {
                 setTimeout(resolve, timeout, new Error('Promise timeout'));
-            }).then(error => jobDone(error, promise, index))
-        ]);
+            })
+        ]).then(
+            resolve => jobDone(resolve, promise, index),
+            error => jobDone(error, promise, index)
+        );
         queue.push(promise);
         if (queue.length >= parallelNum) {
             await Promise.race(queue);
