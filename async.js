@@ -21,7 +21,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
     return new Promise(
         resolve => {
-            for (let i = 0; i < parallelNum; i++) {
+            while (jobIndex < parallelNum) {
                 execute(jobIndex++);
             }
 
