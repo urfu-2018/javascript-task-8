@@ -31,27 +31,25 @@ function runParallel(jobs, parallelNum) {
         }
 
         const next = () => {
-            if (globalIndex >= jobs.length) {
-                if (taskListCompleted.every(item => item)) {
-                    resolve(jobsResult);
-                }
-
-                return;
+            if (jobsResult.length === jobs.length) {
+                resolve(jobsResult);
             }
-            const { job, i } = jobsWithIndex[globalIndex];
-            job()
-                .then(result => {
-                    jobsResult[i] = result;
-                    globalIndex++;
-                    taskListCompleted[i] = true;
-                    next();
-                })
-                .catch(error => {
-                    jobsResult[i] = error;
-                    globalIndex++;
-                    taskListCompleted[i] = true;
-                    next();
-                });
+            if (globalIndex < jobs.length) {
+                const { job, i } = jobsWithIndex[globalIndex];
+                job()
+                    .then(result => {
+                        jobsResult[i] = result;
+                        globalIndex++;
+                        taskListCompleted[i] = true;
+                        next();
+                    })
+                    .catch(error => {
+                        jobsResult[i] = error;
+                        globalIndex++;
+                        taskListCompleted[i] = true;
+                        next();
+                    });
+            }
         };
 
         const startWork = tasks => {
