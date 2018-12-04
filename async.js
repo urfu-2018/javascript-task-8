@@ -21,23 +21,23 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         const results = [];
         let nextJobIndex = 0;
 
-        const runNext = () => {
+        const createCompletionHandler = (index) => (result) => {
+            results[index] = result;
+
+            if (results.length >= jobs.length) {
+                resolve(results);
+            } else {
+                runNext();
+            }
+        };
+
+        function runNext() {
             const ownIndex = nextJobIndex++;
-
-            const handleEnd = (item) => {
-                results[ownIndex] = item;
-
-                if (results.length >= jobs.length) {
-                    resolve(results);
-                } else {
-                    runNext();
-                }
-            };
 
             const nextJob = jobs[ownIndex];
 
-            preventFail(withTimeout(nextJob(), timeout)).then(handleEnd);
-        };
+            preventFail(withTimeout(nextJob(), timeout)).then(createCompletionHandler(ownIndex));
+        }
 
         for (let i = 0; i < Math.min(parallelNum, jobs.length); i++) {
             runNext(i);
