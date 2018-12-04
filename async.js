@@ -15,7 +15,7 @@ const isStar = true;
 function runParallel(jobs, parallelNum, timeout = 1000) {
     // асинхронная магия
     return new Promise(function (resolve) {
-        if (jobs.length === 0 || !parallelNum) {
+        if (jobs.length === 0) {
             resolve([]);
         }
         const results = [];
