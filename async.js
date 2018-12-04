@@ -23,39 +23,37 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         const pushResult = (translation) => {
             translations.push(translation);
             if (translations.length === jobs.length) {
-                return resolve(translations);
+                resolve(translations);
             }
         };
-        let arrayOfArrayToExecuteParallel = [];
+        let allPromises = [];
         while (i < jobs.length) {
-            arrayOfArrayToExecuteParallel.push(groupParallel());
+            allPromises = allPromises.concat(groupParallel());
         }
-        executeParallel(arrayOfArrayToExecuteParallel);
+        executeParallel(allPromises);
 
         function groupParallel() {
             let j = 0;
-            let translationPromises = [];
+            let promises = [];
             while (j < parallelNum) {
-                const translationPromise = jobs[i + j]();
-                translationPromises.push(translationPromise.catch(res=>res));
+                const promise = jobs[i + j]().catch(res=>res);
+                promises.push(promise);
                 j++;
             }
             i += parallelNum;
 
-            return translationPromises;
+            return promises;
         }
 
-        async function executeParallel(arrayGroup) {
-            for (const array of arrayGroup) {
-                for (const promise of array) {
-                    await Promise.race([
-                        promise,
-                        new Promise(reject =>
-                            setTimeout(reject, timeout, new Error('Promise timeout')))
-                    ])
-                        .then(pushResult)
-                        .catch(pushResult);
-                }
+        async function executeParallel(array) {
+            for (let each of array) {
+                await Promise.race([
+                    each,
+                    new Promise(reject =>
+                        setTimeout(reject, timeout, new Error('Promise timeout')))
+                ])
+                    .then(pushResult)
+                    .catch(pushResult);
             }
         }
     });
