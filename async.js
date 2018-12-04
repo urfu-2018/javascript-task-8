@@ -30,10 +30,10 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
         function translatingNext(phrases, indexPhrase) {
             translatedPhrases[indexPhrase] = phrases;
-            if (currentPhrase < jobs.length) {
+            if (translatedPhrases.length === jobs.length) {
+                resolve(translatedPhrases);
+            } else {
                 startTranslating(currentPhrase++);
-            } else if (translatedPhrases.length === jobs.length) {
-                return resolve(translatedPhrases);
             }
         }
 
