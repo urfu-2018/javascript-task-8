@@ -26,10 +26,11 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                 return resolve(translations);
             }
         };
+        let arrayOfArrayToExecuteParallel = [];
         while (i < jobs.length) {
-            const arrayToExecuteParallel = groupParallel();
-            executeParallel(arrayToExecuteParallel);
+            arrayOfArrayToExecuteParallel.push(groupParallel());
         }
+        executeParallel(arrayOfArrayToExecuteParallel);
 
         function groupParallel() {
             let j = 0;
@@ -44,15 +45,17 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             return translationPromises;
         }
 
-        async function executeParallel(promisesGroup) {
-            for (const promise of promisesGroup) {
-                await Promise.race([
-                    promise,
-                    new Promise(reject =>
-                        setTimeout(reject, timeout, new Error('Promise timeout')))
-                ])
-                    .then(pushResult)
-                    .catch(pushResult);
+        async function executeParallel(arrayGroup) {
+            for (const array of arrayGroup) {
+                for (const promise of array) {
+                    await Promise.race([
+                        promise,
+                        new Promise(reject =>
+                            setTimeout(reject, timeout, new Error('Promise timeout')))
+                    ])
+                        .then(pushResult)
+                        .catch(pushResult);
+                }
             }
         }
     });
