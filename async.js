@@ -29,13 +29,14 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                 Promise.race([jobs[index](), new Promise(reject => {
                     setTimeout(reject, timeout, new Error('Error!'));
                 })])
-                    .then(res => finished(res, index), error => finished(error, index));
+                    .then(res => finished(res, index))
+                    .catch(error => finished(error, index));
             }
 
             function finished(res, index) {
                 result[index] = res;
                 if (result.length === jobs.length) {
-                    return resolve(result);
+                    resolve(result);
                 }
                 if (jobIndex < jobs.length) {
                     execute(jobIndex++);
