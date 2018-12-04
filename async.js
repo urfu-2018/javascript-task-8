@@ -9,9 +9,10 @@ const isStar = false;
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
  * @param {Number} parallelNum - число одновременно исполняющихся промисов
+ * @param {Number} timeout - таймаут работы промиса
  * @returns {Promise<Array>}
  */
-function runParallel(jobs, parallelNum) {
+function runParallel(jobs, parallelNum, timeout = 1000) {
     const result = [];
     let curIndex = 0;
     let finishedJobs = 0;
@@ -36,7 +37,7 @@ function runParallel(jobs, parallelNum) {
         };
 
         if (jobs.length === 0 || parallelNum === 0) {
-            return Promise.resolve(result);
+            return resolve(result);
         }
 
         for (let i = 0; i < jobs.length && i < parallelNum; i++) {
