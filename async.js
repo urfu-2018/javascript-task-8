@@ -6,6 +6,27 @@
  */
 const isStar = true;
 
+class ResultsContainer {
+    constructor(totalJobs) {
+        this.totalJobs = totalJobs;
+        this.results = [];
+        this.completeJobs = 0;
+    }
+
+    saveResult(id, result) {
+        this.results[id] = result;
+        this.completeJobs++;
+    }
+
+    isComplete() {
+        return this.completeJobs >= this.totalJobs;
+    }
+
+    getResult() {
+        return this.results;
+    }
+}
+
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
  * @param {Number} parallelNum - число одновременно исполняющихся промисов
@@ -14,22 +35,19 @@ const isStar = true;
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
     // асинхронная магия
-
     if (!jobs.length || parallelNum <= 0) {
         return Promise.resolve([]);
     }
 
     return new Promise((resolve) => {
-        let results = [];
-
-        let completeJobs = 0;
+        const results = new ResultsContainer(jobs.length);
         let index = 0;
 
         function handleJobEnd(id, result) {
-            results[id] = result;
-            completeJobs++;
-            if (completeJobs >= jobs.length) {
-                return resolve(results);
+            results.saveResult(id, result);
+
+            if (results.isComplete()) {
+                return resolve(results.getResult());
             } else if (index < jobs.length) {
                 runNextJob();
             }
