@@ -12,10 +12,10 @@ const isStar = false;
  * @param {Number} timeout - таймаут работы промиса
  * @returns {Promise<Array>}
  */
-async function runParallel(jobs, parallelNum, timeout = 1000) {
+function runParallel(jobs, parallelNum, timeout = 1000) {
     return new Promise(function (resolve) {
-        if (!jobs.length) {
-            return Promise.resolve([]);
+        if (!jobs.length && jobs.length === 0) {
+            return resolve([]);
         }
         let translatedPhrases = [];
         let currentPhrase = 0;
