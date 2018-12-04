@@ -36,13 +36,14 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             }
         };
 
-        if (jobs.length === 0 || parallelNum === 0) {
+        if (length === 0 || parallelNum === 0) {
             return resolve(result);
         }
 
         for (let i = 0; i < jobs.length && i < parallelNum; i++) {
             begin();
         }
+        setTimeout(() => finishedJobs, timeout);
     });
 }
 
