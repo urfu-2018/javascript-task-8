@@ -18,12 +18,26 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         if (jobs.length === 0) {
             resolve([]);
         }
-        let jobPromises = jobs.map(job => Promise
-            .resolve(Promise.race([job().catch(res=>res),
+        let translations = [];
+        let curIndex = 0;
+        executeNextJob(curIndex++);
+
+        async function executeNextJob(index) {
+            const promise = jobs[index]();
+
+            translations[index] = await Promise.race([
+                promise,
                 new Promise(reject =>
-                    setTimeout(reject, timeout, new Error('Promise timeout')))])).catch(res=>res));
-        let translations = Promise.all(jobPromises);
-        resolve(translations);
+                    setTimeout(reject, timeout, new Error('Promise timeout')))
+            ])
+                .then(res => res)
+                .catch(res => res);
+            if (translations.length === jobs.length) {
+                resolve(translations);
+            } else {
+                executeNextJob(curIndex++);
+            }
+        }
     });
 }
 
