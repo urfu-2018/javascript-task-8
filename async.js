@@ -41,7 +41,7 @@ function runParallel(tasks, parallelNum, timeout = 1000) {
 
             Promise
                 .race([tasks[taskID](), timeoutPromise(timeout)])
-                .then(endTask, endTask);
+                .then(endTask);
         }
 
         for (let index = 0; index < Math.min(tasks.length, parallelNum); index++) {
