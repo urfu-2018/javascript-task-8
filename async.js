@@ -34,11 +34,10 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             if (indexJobs.length) {
                 let job = indexJobs.shift();
 
-                new Promise((res, reject) => {
+                let timeoutPromise = new Promise((res, reject) => {
                     setTimeout(() => reject(new Error('Promise timeout')), timeout);
-                    job.x()
-                        .then(res, reject);
-                })
+                });
+                Promise.race([timeoutPromise, job.x()])
                     .then(x => setResult(x, job.i), x => setResult(x, job.i))
                     .then(begin);
             }
