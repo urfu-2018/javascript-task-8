@@ -30,7 +30,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                 if (results.length === jobs.length) {
                     resolve(result);
                 }
-                if (results.length < jobs.length) {
+                if (taskId < jobs.length) {
                     runTask(taskIndex++);
                 }
             };
