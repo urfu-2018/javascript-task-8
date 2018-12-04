@@ -20,41 +20,34 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         }
         let translations = [];
         let i = 0;
-        const pushResult = (translation) => {
-            translations.push(translation);
+        const pushResult = (translation, index) => {
+            translations[index] = translation;
             if (translations.length === jobs.length) {
                 resolve(translations);
             }
         };
-        let allPromises = [];
         while (i < jobs.length) {
-            allPromises = allPromises.concat(groupParallel());
+            groupParallel();
         }
-        executeParallel(allPromises);
 
         function groupParallel() {
             let j = 0;
-            let promises = [];
             while (j < parallelNum) {
                 const promise = jobs[i + j]().catch(res=>res);
-                promises.push(promise);
+                executeParallel(promise, i + j);
                 j++;
             }
             i += parallelNum;
-
-            return promises;
         }
 
-        async function executeParallel(array) {
-            for (let each of array) {
-                await Promise.race([
-                    each,
-                    new Promise(reject =>
-                        setTimeout(reject, timeout, new Error('Promise timeout')))
-                ])
-                    .then(pushResult)
-                    .catch(pushResult);
-            }
+        async function executeParallel(promise, index) {
+            await Promise.race([
+                promise,
+                new Promise(reject =>
+                    setTimeout(reject, timeout, new Error('Promise timeout')))
+            ])
+                .then(res => pushResult(res, index))
+                .catch(res => pushResult(res, index));
         }
     });
 }
