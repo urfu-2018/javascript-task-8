@@ -23,14 +23,14 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         const result = [];
         const countJobs = jobs.length;
         const count = countJobs < parallelNum ? countJobs : parallelNum;
-        let indexFlow = 0;
+        let index = 0;
 
-        while (indexFlow < count) {
-            doJobs(indexFlow++);
+        while (index < count) {
+            doJobs(index++);
         }
 
-        function doJobs(index) {
-            const job = jobs[index];
+        function doJobs() {
+            const job = jobs[index - 1];
 
             return Promise
                 .race([
@@ -39,23 +39,19 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                         setTimeout(reject, timeout, new Error('Promise timeout'));
                     })
                 ])
-                .then(reject => {
-                    result[index] = reject;
-                    if (result.length === countJobs) {
-                        resolve(result);
-                    }
-                    if (indexFlow < countJobs) {
-                        doJobs(indexFlow++);
-                    }
-                }, reject => {
-                    result[index] = reject;
-                    if (result.length === countJobs) {
-                        resolve(result);
-                    }
-                    if (indexFlow < countJobs) {
-                        doJobs(indexFlow++);
-                    }
-                });
+                .then(
+                    reject => doJobsNext(reject),
+                    reject => doJobsNext(reject));
+        }
+
+        function doJobsNext(reject) {
+            result[index - 1] = reject;
+            if (result.length === countJobs) {
+                resolve(result);
+            }
+            if (index < countJobs) {
+                doJobs(index++);
+            }
         }
     });
 }
