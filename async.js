@@ -18,10 +18,13 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     let finishedJobs = 0;
     const length = jobs.length;
 
+    if (length === 0) {
+        return Promise.resolve(result);
+    }
+
     return new Promise(resolve => {
         function getData(data) {
-            result[curIndex] = data;
-            curIndex++;
+            result[curIndex++] = data;
             finishedJobs++;
         }
 
@@ -29,18 +32,15 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             if (finishedJobs === length) {
                 resolve(result);
             }
-            if (jobs.length > 0) {
+            if (jobs.length) {
                 jobs.shift()()
                     .then(getData, getData)
                     .then(begin);
             }
         };
 
-        if (length === 0 || parallelNum === 0) {
-            return resolve(result);
-        }
 
-        for (let i = 0; i < jobs.length && i < parallelNum; i++) {
+        for (let i = 0; i < length && i < parallelNum; i++) {
             begin();
         }
         setTimeout(() => finishedJobs, timeout);
