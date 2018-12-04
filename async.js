@@ -9,41 +9,38 @@ const isStar = false;
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
  * @param {Number} parallelNum - число одновременно исполняющихся промисов
- * @param {Number} timeout - таймаут работы промиса
  * @returns {Promise<Array>}
  */
-function runParallel(jobs, parallelNum, timeout = 1000) {
+function runParallel(jobs, parallelNum) {
+    const indexJobs = jobs.map((x, i) => ({ x, i }));
     const result = [];
-    let curIndex = 0;
     let finishedJobs = 0;
-    const length = jobs.length;
 
-    if (length === 0) {
+    if (!jobs.length) {
         return Promise.resolve(result);
     }
 
     return new Promise(resolve => {
-        function getData(data) {
-            result[curIndex++] = data;
+        function setResult(data, index) {
+            result[index] = data;
             finishedJobs++;
         }
 
         const begin = () => {
-            if (finishedJobs === length) {
+            if (finishedJobs === jobs.length) {
                 resolve(result);
             }
-            if (jobs.length) {
-                jobs.shift()()
-                    .then(getData, getData)
+            if (indexJobs.length) {
+                let job = indexJobs.shift();
+                job.x()
+                    .then(x => setResult(x, job.i), x => setResult(x, job.i))
                     .then(begin);
             }
         };
 
-
-        for (let i = 0; i < length && i < parallelNum; i++) {
+        for (let i = 0; i < jobs.length && i < parallelNum; i++) {
             begin();
         }
-        setTimeout(() => finishedJobs, timeout);
     });
 }
 
