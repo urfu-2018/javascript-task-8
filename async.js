@@ -18,13 +18,13 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     let finishedJobs = 0;
     const length = jobs.length;
 
-    function getData(data) {
-        result[curIndex] = data;
-        curIndex++;
-        finishedJobs++;
-    }
-
     return new Promise(resolve => {
+        function getData(data) {
+            result[curIndex] = data;
+            curIndex++;
+            finishedJobs++;
+        }
+
         const begin = () => {
             if (finishedJobs === length) {
                 resolve(result);
