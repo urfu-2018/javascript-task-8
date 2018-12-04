@@ -20,6 +20,9 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         }
         const results = [];
         const taskLimit = Math.min(jobs.length, parallelNum);
+        const timeoutPromise = new Promise(function (res, rej) {
+            setTimeout(rej, timeout, new Error('Promise timeout'));
+        });
         var taskIndex = 0;
         function handleTask(taskId) {
             return function (result) {
@@ -32,15 +35,16 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                 }
             };
         }
+
         async function runTask(taskId) {
             const task = jobs[taskId]();
             const cb = handleTask(taskId);
-            const timeoutPromise = new Promise(function (res, rej) {
-                setTimeout(rej, timeout, new Error('Promise timeout'));
-            });
-            Promise
-                .race([task, timeoutPromise])
-                .then(cb, cb);
+            try {
+                const result = Promise.race([task, timeoutPromise]);
+                cb(result);
+            } catch (error) {
+                cb(error);
+            }
         }
         for (let i = 0; i < taskLimit; i++) {
             runTask(taskIndex++);
