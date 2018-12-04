@@ -17,17 +17,17 @@ async function runParallel(jobs, parallelNum, timeout = 1000) {
         return [];
     }
 
-    const queue = [];
+    const indexesQueue = [];
     for (let i = 0; i < jobs.length; i++) {
-        queue.push(jobs[i]);
+        indexesQueue.push(i);
     }
 
-    const result = [];
+    const result = new Array(jobs.length);
     const count = Math.min(jobs.length, parallelNum);
 
     const workers = [];
     for (let i = 0; i < count; i++) {
-        workers.push(doWork(queue, result, timeout));
+        workers.push(doWork(indexesQueue, jobs, result, timeout));
     }
 
     await Promise.all(workers);
@@ -35,16 +35,20 @@ async function runParallel(jobs, parallelNum, timeout = 1000) {
     return result;
 }
 
-async function doWork(queue, result, timeout) {
-    while (queue.length > 0) {
-        const item = queue.shift();
+async function doWork(indexesQueue, jobs, result, timeout) {
+    while (indexesQueue.length > 0) {
+        const index = indexesQueue.shift();
 
-        if (item === undefined) {
+        if (index === undefined) {
             continue;
         }
 
-        await Promise.race([item(), startTimer(timeout)])
-            .then(res => result.push(res), res => result.push(res));
+        await Promise.race([jobs[index](), startTimer(timeout)])
+            .then(res => {
+                result[index] = res;
+            }, res => {
+                result[index] = res;
+            });
     }
 }
 
