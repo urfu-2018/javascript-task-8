@@ -13,7 +13,7 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
-    if (jobs.length === 0) {
+    if (!jobs.length) {
         return Promise.resolve([]);
     }
     const result = [];
@@ -38,7 +38,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                 if (result.length === jobs.length) {
                     resolve(result);
                 }
-                if (index < jobs.length) {
+                if (jobIndex < jobs.length) {
                     execute(jobIndex++);
                 }
             }
