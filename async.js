@@ -40,7 +40,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             const task = jobs[taskId]();
             const cb = handleTask(taskId);
             try {
-                const result = Promise.race([task, timeoutPromise]);
+                const result = await Promise.race([task, timeoutPromise]);
                 cb(result);
             } catch (error) {
                 cb(error);
