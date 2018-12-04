@@ -15,7 +15,7 @@ function runParallel(jobs, parallelNum) {
     const result = [];
     let curIndex = 0;
     let finishedJobs = 0;
-    const lenght = jobs.length;
+    const length = jobs.length;
     if (jobs.length === 0 || parallelNum === 0) {
         return Promise.resolve(result);
     }
@@ -23,18 +23,18 @@ function runParallel(jobs, parallelNum) {
     function getData(data) {
         result[curIndex] = data;
         curIndex++;
+        finishedJobs++;
     }
 
     return new Promise(resolve => {
 
         const begin = () => {
-            if (finishedJobs === lenght) {
+            if (finishedJobs === length) {
                 resolve(result);
             }
             if (jobs.length > 0) {
                 jobs.shift()()
                     .then(getData, getData)
-                    .then(() => finishedJobs++)
                     .then(begin);
             }
         };
