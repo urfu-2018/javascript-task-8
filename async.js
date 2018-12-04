@@ -32,10 +32,9 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                 }
             };
 
-            new Promise((innerResolve) => {
-                const nextJob = jobs[nextIndex];
-                withTimeout(nextJob(), timeout).then(innerResolve, innerResolve);
-            }).then(handleEnd);
+            const nextJob = jobs[nextIndex];
+
+            preventFail(withTimeout(nextJob(), timeout)).then(handleEnd);
         };
 
         for (let i = 0; i < Math.min(parallelNum, jobs.length); i++) {
@@ -48,6 +47,12 @@ function withTimeout(promise, timeout) {
     return new Promise((resolve, reject) => {
         setTimeout(reject, timeout, new Error('Promise timeout'));
         promise.then(resolve, reject);
+    });
+}
+
+function preventFail(promise) {
+    return new Promise(resolve => {
+        promise.then(resolve).catch(resolve);
     });
 }
 
