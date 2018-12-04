@@ -12,7 +12,7 @@ const isStar = true;
  * @param {Number} timeout - таймаут работы промиса
  * @returns {Promise<Array>}
  */
-function runParallel(jobs, parallelNum, timeout = 10000) {
+function runParallel(jobs, parallelNum, timeout = 100000) {
     if (jobs.length === 0) {
         return Promise.resolve([]);
     }
@@ -35,23 +35,20 @@ function runParallel(jobs, parallelNum, timeout = 10000) {
             }
             if (ind < jobs.length) {
                 const { job, i } = jobsWithIndex[ind];
-                Promise.race([job(), startTimer()])
-                    .then(result => saveResultAndGoNext(result, i))
-                    .catch(error => saveResultAndGoNext(error, i));
+                doJobWithTimer(job, i);
             }
         }
 
         const startWork = tasks => {
             globalIndex = tasks.length;
-            tasks.forEach(({ job, i }) => {
-                Promise.race([job(), startTimer()])
-                    .then(result => saveResultAndGoNext(result, i))
-                    .catch(error => {
-                        console.info(error);
-                        saveResultAndGoNext(error, i);
-                    });
-            });
+            tasks.forEach(({ job, i }) => doJobWithTimer(job, i));
         };
+
+        function doJobWithTimer(job, i) {
+            Promise.race([job(), startTimer()])
+                .then(result => saveResultAndGoNext(result, i))
+                .catch(error => saveResultAndGoNext(error, i));
+        }
 
         function startTimer() {
             return new Promise((_, reject) => setTimeout(() => reject(new Error('Promise timeout')),
