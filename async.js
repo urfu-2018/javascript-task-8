@@ -21,7 +21,8 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         let jobPromises = jobs.map(job => Promise
             .resolve(Promise.race([job().catch(res=>res),
                 new Promise(reject =>
-                    setTimeout(reject, timeout, new Error('Promise timeout')))])));
+                    setTimeout(reject, timeout, new Error('Promise timeout')))])))
+            .catch(res=>res);
         let translations = Promise.all(jobPromises);
         resolve(translations);
     });
