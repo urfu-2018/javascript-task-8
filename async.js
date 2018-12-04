@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализована остановка промиса по таймауту
  */
-const isStar = true;
+const isStar = false;
 let lastStartedIndex = 0;
 
 function executeJob(jobIndex, resolve, results, jobs) {
