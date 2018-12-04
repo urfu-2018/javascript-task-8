@@ -12,39 +12,39 @@ function timeoutPromise(timeout) {
 }
 
 /** Функция паралелльно запускает указанное число промисов
- * @param {Function<Promise>[]} tasks – функции, которые возвращают промисы
+ * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
  * @param {Number} parallelNum - число одновременно исполняющихся промисов
  * @param {Number} timeout - таймаут работы промиса
  * @returns {Promise<Array>}
  */
-function runParallel(tasks, parallelNum, timeout = 1000) {
+function runParallel(jobs, parallelNum, timeout = 1000) {
     return new Promise(resolve => {
-        if (tasks.length === 0) {
+        if (jobs.length === 0) {
             return resolve([]);
         }
 
         let taskNumber = 0;
-        const queue = [];
+        const tasksQueue = [];
 
-        function addTask(taskID) {
+        function addTask(jobNumber) {
             function endTask(result) {
-                queue[taskID] = result;
-                if (queue.length === tasks.length) {
-                    return resolve(queue);
+                tasksQueue[jobNumber] = result;
+                if (tasksQueue.length === jobs.length) {
+                    return resolve(tasksQueue);
                 }
 
-                if (taskNumber < tasks.length) {
+                if (taskNumber < jobs.length) {
                     taskNumber++;
                     addTask(taskNumber - 1);
                 }
             }
 
             Promise
-                .race([tasks[taskID](), timeoutPromise(timeout)])
+                .race([jobs[jobNumber](), timeoutPromise(timeout)])
                 .then(endTask);
         }
 
-        for (let index = 0; index < Math.min(tasks.length, parallelNum); index++) {
+        for (let index = 0; index < Math.min(jobs.length, parallelNum); index++) {
             taskNumber++;
             addTask(taskNumber - 1);
         }
