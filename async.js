@@ -26,12 +26,13 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             return;
         }
 
+        const indexTranslate = counter++;
+
         return Promise.race([
             new Promise(resolve => setTimeout(resolve, timeout, new Error('Promise timeout'))),
             anotherTranslate.shift()().catch(thrower)
         ]).then(res => {
-            resultTranslate[counter] = res;
-            counter++;
+            resultTranslate[indexTranslate] = res;
 
             return startTranslate(anotherTranslate);
         });
@@ -39,7 +40,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
     const translates = [];
 
-    while (parallelNum > 0 && jobs.length !== 0) {
+    while (parallelNum > 0 && jobs.length) {
         translates.push(startTranslate(jobs));
         parallelNum--;
     }
