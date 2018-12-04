@@ -29,40 +29,31 @@ function runParallel(jobs, parallelNum) {
             currentJobs.push(...jobsWithIndex.slice(0, parallelNum));
         }
 
-        const next = () => {
+        function next(ind) {
             if (jobsResult.length === jobs.length) {
                 resolve(jobsResult);
             }
-            if (globalIndex < jobs.length) {
-                const { job, i } = jobsWithIndex[globalIndex];
+            if (ind < jobs.length) {
+                const { job, i } = jobsWithIndex[ind];
                 job()
-                    .then(result => {
-                        jobsResult[i] = result;
-                        globalIndex++;
-                        next();
-                    })
-                    .catch(error => {
-                        jobsResult[i] = error;
-                        globalIndex++;
-                        next();
-                    });
+                    .then(result => saveResultAndGoNext(result, i))
+                    .catch(error => saveResultAndGoNext(error, i));
             }
-        };
+        }
 
         const startWork = tasks => {
             globalIndex = tasks.length;
             tasks.forEach(({ job, i }) => {
                 job()
-                    .then(result => {
-                        jobsResult[i] = result;
-                        next();
-                    })
-                    .catch(error => {
-                        jobsResult[i] = error;
-                        next();
-                    });
+                    .then(result => saveResultAndGoNext(result, i))
+                    .catch(error => saveResultAndGoNext(error, i));
             });
         };
+
+        function saveResultAndGoNext(res, index) {
+            jobsResult[index] = res;
+            next(globalIndex++);
+        }
 
         startWork(currentJobs);
     });
