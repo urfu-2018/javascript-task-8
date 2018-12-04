@@ -37,7 +37,7 @@ async function runParallel(jobs, parallelNum, timeout = 1000) {
 
 async function doWork(indexesQueue, jobs, result, timeout) {
     while (indexesQueue.length > 0) {
-        const index = indexesQueue.shift();
+        let index = indexesQueue.shift();
 
         if (index === undefined) {
             continue;
@@ -52,8 +52,8 @@ async function doWork(indexesQueue, jobs, result, timeout) {
     }
 }
 
-function startTimer(timeout) {
-    return new Promise((then, reject) => {
+async function startTimer(timeout) {
+    return await new Promise((then, reject) => {
         setTimeout(() => {
             reject(new Error('Promise timeout'));
         }, timeout);
