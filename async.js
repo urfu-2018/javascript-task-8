@@ -21,7 +21,6 @@ function runParallel(jobs, parallelNum) {
     let globalIndex = 0;
     let currentJobs = [];
     const jobsWithIndex = jobs.map((job, i) => ({ job, i }));
-    const taskListCompleted = Array.from(Array(jobsWithIndex.length).keys()).map(() => false);
 
     return new Promise(resolve => {
         if (jobs.length <= parallelNum) {
@@ -40,13 +39,11 @@ function runParallel(jobs, parallelNum) {
                     .then(result => {
                         jobsResult[i] = result;
                         globalIndex++;
-                        taskListCompleted[i] = true;
                         next();
                     })
                     .catch(error => {
                         jobsResult[i] = error;
                         globalIndex++;
-                        taskListCompleted[i] = true;
                         next();
                     });
             }
@@ -58,12 +55,10 @@ function runParallel(jobs, parallelNum) {
                 job()
                     .then(result => {
                         jobsResult[i] = result;
-                        taskListCompleted[i] = true;
                         next();
                     })
                     .catch(error => {
                         jobsResult[i] = error;
-                        taskListCompleted[i] = true;
                         next();
                     });
             });
