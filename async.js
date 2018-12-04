@@ -12,7 +12,7 @@ const isStar = false;
  * @param {Number} timeout - таймаут работы промиса
  * @returns {Promise<Array>}
  */
-function runParallel(jobs, parallelNum, timeout = 1000) {
+async function runParallel(jobs, parallelNum, timeout = 1000) {
     return new Promise(function (resolve) {
         if (!jobs.length) {
             return Promise.resolve([]);
@@ -30,10 +30,10 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
         function translatingNext(phrases, indexPhrase) {
             translatedPhrases[indexPhrase] = phrases;
-            if (translatedPhrases.length === jobs.length) {
-                resolve(translatedPhrases);
-            } else {
+            if (currentPhrase < jobs.length) {
                 startTranslating(currentPhrase++);
+            } else if (translatedPhrases.length === jobs.length) {
+                return resolve(translatedPhrases);
             }
         }
 
