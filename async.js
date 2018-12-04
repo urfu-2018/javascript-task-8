@@ -41,15 +41,13 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
             Promise
                 .race([jobs[jobNumber](), timeoutPromise(timeout)])
-                .then(endTask);
+                .then(endTask, endTask);
         }
 
         for (let index = 0; index < Math.min(jobs.length, parallelNum); index++) {
             taskNumber++;
             addTask(taskNumber - 1);
         }
-
-
     });
 }
 
