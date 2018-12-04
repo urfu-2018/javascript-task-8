@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализована остановка промиса по таймауту
  */
-const isStar = false;
+const isStar = true;
 
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
@@ -12,9 +12,8 @@ const isStar = false;
  * @param {Number} timeout - таймаут работы промиса
  * @returns {Promise<Array>}
  */
-// eslint-disable-next-line no-unused-vars
 function runParallel(jobs, parallelNum, timeout = 1000) {
-    if (!jobs.length) {
+    if (!jobs.length || parallelNum <= 0) {
         return Promise.resolve([]);
     }
 
@@ -27,19 +26,20 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             return;
         }
 
-        return anotherTranslate.shift()()
-            .catch(thrower)
-            .then(res => {
-                resultTranslate[counter] = res;
-                counter++;
+        return Promise.race([
+            new Promise(resolve => setTimeout(resolve, timeout, new Error('Promise timeout'))),
+            anotherTranslate.shift()().catch(thrower)
+        ]).then(res => {
+            resultTranslate[counter] = res;
+            counter++;
 
-                return startTranslate(anotherTranslate);
-            });
+            return startTranslate(anotherTranslate);
+        });
     }
 
     const translates = [];
 
-    while (parallelNum >= 0 && jobs.length !== 0) {
+    while (parallelNum > 0 && jobs.length !== 0) {
         translates.push(startTranslate(jobs));
         parallelNum--;
     }
