@@ -45,7 +45,7 @@ function runParallel(jobs, parallelNum, timeout = 100000) {
         };
 
         function doJobWithTimer(job, i) {
-            Promise.race([job(), startTimer()])
+            return Promise.race([job(), startTimer()])
                 .then(result => saveResultAndGoNext(result, i))
                 .catch(error => saveResultAndGoNext(error, i));
         }

@@ -10,7 +10,15 @@ function createAsyncJob(spy) {
     return () => new Promise(resolve => {
         setTimeout(() => {
             spy();
-            resolve();
+            resolve(1);
+        }, 100);
+    });
+}
+function createAsyncJob2(spy) {
+    return () => new Promise(resolve => {
+        setTimeout(() => {
+            spy();
+            resolve(2);
         }, 100);
     });
 }
@@ -22,8 +30,8 @@ describe('runParallel tests', () => {
 
         return async.runParallel([
             createAsyncJob(firstSpy),
-            createAsyncJob(secondSpy)
-        ], 1).then(() => {
+            createAsyncJob2(secondSpy)
+        ], 1, 103).then(() => {
             assert(firstSpy.calledOnce, 'Spy №1 вызван один раз');
             assert(secondSpy.calledOnce, 'Spy №2 вызван один раз');
 
