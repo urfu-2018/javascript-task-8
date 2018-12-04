@@ -47,6 +47,14 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                     if (indexFlow < countJobs) {
                         doJobs(indexFlow++);
                     }
+                }, reject => {
+                    result[index] = reject;
+                    if (result.length === countJobs) {
+                        resolve(result);
+                    }
+                    if (indexFlow < countJobs) {
+                        doJobs(indexFlow++);
+                    }
                 });
         }
     });
