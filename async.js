@@ -39,7 +39,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
             const item = queue.shift();
             Promise.race([item(), startTimer()])
-                .then(res => result.push(res))
+                .then(res => result.push(res), res => result.push(res))
                 .then(doWork, doWork);
         }
 
