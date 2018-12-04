@@ -18,21 +18,23 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     }
 
     return new Promise((resolve) => {
-        let index = 0;
         const results = [];
+        let nextJobIndex = 0;
 
-        const runNext = (nextIndex) => {
-            index ++;
+        const runNext = () => {
+            const ownIndex = nextJobIndex++;
+
             const handleEnd = (item) => {
-                results[nextIndex] = item;
-                if (jobs.length === results.length) {
+                results[ownIndex] = item;
+
+                if (results.length >= jobs.length) {
                     resolve(results);
                 } else {
-                    runNext(index);
+                    runNext();
                 }
             };
 
-            const nextJob = jobs[nextIndex];
+            const nextJob = jobs[ownIndex];
 
             preventFail(withTimeout(nextJob(), timeout)).then(handleEnd);
         };
