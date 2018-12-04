@@ -23,15 +23,15 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         const timeoutPromise = new Promise(function (res, rej) {
             setTimeout(rej, timeout, new Error('Promise timeout'));
         });
-        var taskIndex = 0;
+        var currentIndex = 0;
         function handleTask(taskId) {
             return function (result) {
                 results[taskId] = result;
                 if (results.length === jobs.length) {
                     resolve(result);
                 }
-                if (taskId < jobs.length) {
-                    runTask(taskIndex++);
+                if (currentIndex < jobs.length) {
+                    runTask(currentIndex++);
                 }
             };
         }
@@ -47,7 +47,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             }
         }
         for (let i = 0; i < taskLimit; i++) {
-            runTask(taskIndex++);
+            runTask(currentIndex++);
         }
     });
 }
