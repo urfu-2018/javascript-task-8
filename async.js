@@ -15,26 +15,27 @@ function runParallel(jobs, parallelNum) {
     const result = [];
     let curIndex = 0;
     let finishedJobs = 0;
-    if (!jobs.length) {
+    const lenght = jobs.length;
+    if (jobs.length === 0 || parallelNum === 0) {
         return Promise.resolve(result);
     }
 
     function getData(data) {
         result[curIndex] = data;
+        curIndex++;
     }
 
     return new Promise(resolve => {
 
         const begin = () => {
-            if (!jobs.length) {
+            if (finishedJobs === lenght) {
                 resolve(result);
-            } else {
-                let promiseFunction = jobs.shift();
-                promiseFunction()
+            }
+            if (jobs.length > 0) {
+                jobs.shift()()
                     .then(getData, getData)
                     .then(() => finishedJobs++)
                     .then(begin);
-                curIndex++;
             }
         };
 
