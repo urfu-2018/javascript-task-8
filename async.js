@@ -37,7 +37,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             let translationPromises = [];
             while (j < parallelNum) {
                 const translationPromise = jobs[i + j]();
-                translationPromises.push(translationPromise);
+                translationPromises.push(translationPromise.catch(res=>res));
                 j++;
             }
             i += parallelNum;
