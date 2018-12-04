@@ -20,7 +20,10 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         }
         let translations = [];
         let curIndex = 0;
-        executeNextJob(curIndex++);
+        let i = 0;
+        while (i++ < parallelNum) {
+            executeNextJob(curIndex++);
+        }
 
         async function executeNextJob(index) {
             const promise = jobs[index]();
