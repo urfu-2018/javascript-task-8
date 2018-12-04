@@ -19,6 +19,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         }
 
         let queue = [];
+        let finishedCnt = 0;
         let ans = [];
         let lastIndex = 0;
 
@@ -27,10 +28,13 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
             function saveAndEnqueue(result) {
                 ans[currentIndex] = result;
-                if (lastIndex === jobs.length) {
+                finishedCnt += 1;
+                if (finishedCnt === jobs.length) {
                     return resolve(ans);
                 }
-                enqueueJob();
+                if (lastIndex < jobs.length) {
+                    enqueueJob();
+                }
             }
 
             let promise = runWithTimeout(jobs[lastIndex++], timeout)
@@ -55,7 +59,6 @@ function runWithTimeout(job, timeout) {
 
 module.exports = {
     runParallel,
-    runWithTimeout,
 
     isStar
 };
