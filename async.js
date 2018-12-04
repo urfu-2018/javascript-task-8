@@ -26,28 +26,30 @@ function runParallel(tasks, parallelNum, timeout = 1000) {
         let taskNumber = 0;
         const queue = [];
 
-        function addTask(innerTaskNumber) {
-            const finishCallback = result => {
-                queue[innerTaskNumber] = result;
+        function addTask(taskID) {
+            function endTask(result) {
+                queue[taskID] = result;
                 if (queue.length === tasks.length) {
                     return resolve(queue);
                 }
 
-                if (taskNumber + 1 < tasks.length) {
+                if (taskNumber < tasks.length) {
                     taskNumber++;
-                    addTask(taskNumber);
+                    addTask(taskNumber - 1);
                 }
-            };
+            }
 
             Promise
-                .race([tasks[innerTaskNumber](), timeoutPromise(timeout)])
-                .then(finishCallback, finishCallback);
+                .race([tasks[taskID](), timeoutPromise(timeout)])
+                .then(endTask, endTask);
         }
 
         for (let index = 0; index < Math.min(tasks.length, parallelNum); index++) {
             taskNumber++;
-            addTask(taskNumber);
+            addTask(taskNumber - 1);
         }
+
+
     });
 }
 
