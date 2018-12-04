@@ -16,9 +16,6 @@ function runParallel(jobs, parallelNum) {
     let curIndex = 0;
     let finishedJobs = 0;
     const length = jobs.length;
-    if (jobs.length === 0 || parallelNum === 0) {
-        return Promise.resolve(result);
-    }
 
     function getData(data) {
         result[curIndex] = data;
@@ -27,7 +24,6 @@ function runParallel(jobs, parallelNum) {
     }
 
     return new Promise(resolve => {
-
         const begin = () => {
             if (finishedJobs === length) {
                 resolve(result);
@@ -38,6 +34,10 @@ function runParallel(jobs, parallelNum) {
                     .then(begin);
             }
         };
+
+        if (jobs.length === 0 || parallelNum === 0) {
+            return Promise.resolve(result);
+        }
 
         for (let i = 0; i < jobs.length && i < parallelNum; i++) {
             begin();
