@@ -25,21 +25,20 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             startNewPromise(curri++);
         }
 
-        async function startNewPromise(index) {
+        function startNewPromise(index) {
             function addJob(job) {
                 res[index] = job;
                 if (jobs.length > res.length) {
                     startNewPromise(curri++);
-                }
-                if (res.length === jobs.length) {
+                } else if (res.length === jobs.length) {
                     resolve(res);
                 }
             }
 
-            return (new Promise(reject => {
-                setTimeout(reject, timeout, new Error('Promise timeout'));
-                jobs[index]().then(reject, reject);
-            }))
+            return new Promise(Resolve => {
+                setTimeout(Resolve, timeout, new Error('Promise timeout'));
+                jobs[index]().then(Resolve, Resolve);
+            })
                 .then(addJob);
         }
     });
