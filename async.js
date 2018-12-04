@@ -18,32 +18,31 @@ function runParallel(jobs, parallelNum) {
     }
 
     const result = [];
-    // let error = null;
 
     const run = async () => {
         for (let i = 0; i < jobs.length; i += parallelNum) {
-            try {
-                const values = await Promise.all(
-                    jobs
-                        .slice(i, i + parallelNum)
-                        .map(job => job())
-                );
+            if (parallelNum === 1) {
+                await Promise.resolve(jobs[i]())
+                    .then(value => result.push(value))
+                    .catch(value => result.push(value));
+                // result.push(value);
+            } else {
+                const values = await runParallel(jobs.slice(i, i + parallelNum), 1);
                 result.push(...values);
-            } catch (err) {
-                result.push(err);
-                // break;
+                // try {
+                //     const values = await Promise.all(
+                //         jobs
+                //             .slice(i, i + parallelNum)
+                //             .map(job => job())
+                //     );
+                //     result.push(...values);
+                // } catch (err) {
+                //     result.push(err);
+                // }
             }
         }
 
-        return Promise.resolve(result);
-        //
-        // return new Promise((resolve, reject) => {
-        //     if (error) {
-        //         reject(error);
-        //     } else {
-        //         resolve(result);
-        //     }
-        // });
+        return new Promise(resolve => resolve(result));
     };
 
     return run();
@@ -51,6 +50,5 @@ function runParallel(jobs, parallelNum) {
 
 module.exports = {
     runParallel,
-
     isStar
 };

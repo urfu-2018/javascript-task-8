@@ -19,7 +19,7 @@ function createTranslationJob(lang, text) {
     });
 }
 
-const languages = ['be', 'uk', 'en', 'fr', 'de', 'it', 'pl', 'tr', 'th', 'ja'];
+const languages = ['be', 'uk', 'enn', 'fr', 'de', 'it', 'pl', 'tr', 'th', 'ja'];
 const text = 'дайте мне воды';
 
 const jobs = languages.map(language => createTranslationJob(language, text));

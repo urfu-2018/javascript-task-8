@@ -60,13 +60,16 @@ describe('runParallel tests', () => {
             .runParallel([
                 () => new Promise((resolve, reject) => {
                     reject(new Error());
-                })
+                }),
+                () => Promise.resolve(17),
+                () => new Promise(resolve => resolve('a'))
             ], 2)
-            .catch(err => {
-                // assert.instanceOf(err, Error);
+            .then(values => {
                 assert.throws(() => {
-                    throw err;
+                    throw values[0];
                 }, Error);
+                assert.equal(values[1], 17);
+                assert.equal(values[2], 'a');
             });
     });
 });
