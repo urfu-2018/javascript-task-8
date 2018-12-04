@@ -21,6 +21,7 @@ function runParallel(jobs, parallelNum, timeout = 100000) {
     let globalIndex = 0;
     let currentJobs = [];
     const jobsWithIndex = jobs.map((job, i) => ({ job, i }));
+    const jobsState = [...Array(jobsWithIndex.length).keys()].map(() => false);
 
     return new Promise(resolve => {
         if (jobs.length <= parallelNum) {
@@ -30,7 +31,7 @@ function runParallel(jobs, parallelNum, timeout = 100000) {
         }
 
         function next(ind) {
-            if (jobsResult.length === jobs.length) {
+            if (jobsState.every(i => i)) {
                 resolve(jobsResult);
             }
             if (ind < jobs.length) {
@@ -44,10 +45,13 @@ function runParallel(jobs, parallelNum, timeout = 100000) {
             tasks.forEach(({ job, i }) => doJobWithTimer(job, i));
         };
 
-        function doJobWithTimer(job, i) {
-            return Promise.race([job(), startTimer()])
-                .then(result => saveResultAndGoNext(result, i))
-                .catch(error => saveResultAndGoNext(error, i));
+        async function doJobWithTimer(job, i) {
+            try {
+                const result = await Promise.race([job(), startTimer()]);
+                saveResultAndGoNext(result, i);
+            } catch (e) {
+                saveResultAndGoNext(e, i);
+            }
         }
 
         function startTimer() {
@@ -57,6 +61,7 @@ function runParallel(jobs, parallelNum, timeout = 100000) {
 
         function saveResultAndGoNext(res, index) {
             jobsResult[index] = res;
+            jobsState[index] = true;
             next(globalIndex++);
         }
 
