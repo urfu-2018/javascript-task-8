@@ -40,8 +40,8 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             i += parallelNum;
         }
 
-        async function executeParallel(promise, index) {
-            await Promise.race([
+        function executeParallel(promise, index) {
+            Promise.race([
                 promise,
                 new Promise(reject =>
                     setTimeout(reject, timeout, new Error('Promise timeout')))
