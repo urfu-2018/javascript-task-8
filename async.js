@@ -21,25 +21,26 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         let jobsDone = 0;
         let currentJob = 0;
         const jobsResults = new Array(jobs.length);
+        const lowerBound = Math.min(jobs.length, parallelNum);
 
-        const runJobAsync = (job, jobNumber) => {
-            const saveResultCb = data => {
+        const runJobAsync = function (jobNumber) {
+            const saveResultCb = function (data) {
                 jobsResults[jobNumber] = data;
                 if (++jobsDone === jobs.length) {
                     return resolve(jobsResults);
                 }
 
                 if (currentJob < jobs.length) {
-                    runJobAsync(jobs[currentJob], currentJob);
+                    runJobAsync(currentJob);
                     currentJob++;
                 }
             };
 
-            runJobAsyncWithTimeout(job, saveResultCb, timeout);
+            runJobAsyncWithTimeout(jobs[jobNumber], saveResultCb, timeout);
         };
 
-        for (currentJob = 0; currentJob < Math.min(jobs.length, parallelNum); currentJob++) {
-            runJobAsync(jobs[currentJob], currentJob);
+        for (currentJob; currentJob < lowerBound; currentJob++) {
+            runJobAsync(currentJob);
         }
     });
 }
