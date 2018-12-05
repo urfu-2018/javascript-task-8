@@ -30,7 +30,7 @@ function runParallel(jobs, parallelNum, timeout = 100000) {
             currentJobs.push(...jobsWithIndex.slice(0, parallelNum));
         }
 
-        function next(ind) {
+        function nextJob(ind) {
             if (jobsState.every(i => i)) {
                 resolve(jobsResult);
             }
@@ -62,7 +62,7 @@ function runParallel(jobs, parallelNum, timeout = 100000) {
         function saveResultAndGoNext(res, index) {
             jobsResult[index] = res;
             jobsState[index] = true;
-            next(globalIndex++);
+            nextJob(globalIndex++);
         }
 
         startWork(currentJobs);
