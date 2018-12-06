@@ -18,7 +18,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             return resolve([]);
         }
 
-        const results = [];
+        const results = new Map();
         let currentJobIndex = 0;
 
         for (let i = 0; i < Math.min(jobs.length, parallelNum); i++) {
@@ -27,9 +27,13 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
         function createCallBack(jobIndex) {
             return function (result) {
-                results[jobIndex] = result;
-                if (results.length === jobs.length) {
-                    return resolve(results);
+                results.set(jobIndex, result);
+                if (results.size === jobs.length) {
+                    const resolveValue = Array.from(results)
+                        .sort((job1, job2) => job1[0] - job2[0])
+                        .map(([, job]) => job);
+
+                    return resolve(resolveValue);
                 }
                 if (currentJobIndex < jobs.length) {
                     doJob(currentJobIndex++);
@@ -38,11 +42,11 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         }
 
         function doJob(jobIndex) {
-            const callBack = createCallBack(jobIndex);
+            const callback = createCallBack(jobIndex);
 
             Promise.race([jobs[jobIndex](), new Promise((_, reject) =>
                 setTimeout(reject, timeout, new Error('Promise timeout')))])
-                .then(callBack, callBack);
+                .then(callback, callback);
         }
     });
 }
