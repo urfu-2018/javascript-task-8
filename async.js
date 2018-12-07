@@ -29,8 +29,8 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             currentJobs.push(...jobs.map((job, i) => ({ job, i })).slice(0, parallelNum));
         }
 
-        function next(ind) {
-            if (jobsState.every(i => i)) {
+        function nextJob(ind) {
+            if (jobsState.every(i => i) && jobsResult.length === jobs.length) {
                 resolve(jobsResult);
             }
             if (ind < jobs.length) {
@@ -61,7 +61,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         function saveResultAndGoNext(res, index) {
             jobsResult[index] = res;
             jobsState[index] = true;
-            next(globalIndex++);
+            nextJob(globalIndex++);
         }
 
         startWork(currentJobs);
