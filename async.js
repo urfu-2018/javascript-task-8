@@ -12,7 +12,7 @@ const isStar = true;
  * @param {Number} timeout - таймаут работы промиса
  * @returns {Promise<Array>}
  */
-function runParallel(jobs, parallelNum, timeout = 100000) {
+function runParallel(jobs, parallelNum, timeout = 1000) {
     if (jobs.length === 0) {
         return Promise.resolve([]);
     }
@@ -20,14 +20,13 @@ function runParallel(jobs, parallelNum, timeout = 100000) {
     let jobsResult = [];
     let globalIndex = 0;
     let currentJobs = [];
-    const jobsWithIndex = jobs.map((job, i) => ({ job, i }));
-    const jobsState = [...Array(jobsWithIndex.length).keys()].map(() => false);
+    const jobsState = [...Array(jobs.length).keys()].map(() => false);
 
     return new Promise(resolve => {
         if (jobs.length <= parallelNum) {
-            currentJobs.push(...jobsWithIndex);
+            currentJobs.push(...jobs.map((job, i) => ({ job, i })));
         } else {
-            currentJobs.push(...jobsWithIndex.slice(0, parallelNum));
+            currentJobs.push(...jobs.map((job, i) => ({ job, i })).slice(0, parallelNum));
         }
 
         function next(ind) {
@@ -35,8 +34,8 @@ function runParallel(jobs, parallelNum, timeout = 100000) {
                 resolve(jobsResult);
             }
             if (ind < jobs.length) {
-                const { job, i } = jobsWithIndex[ind];
-                doJobWithTimer(job, i);
+                const job = jobs[ind];
+                doJobWithTimer(job, ind);
             }
         }
 
