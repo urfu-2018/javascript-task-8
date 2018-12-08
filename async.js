@@ -30,10 +30,6 @@ async function work(jobs, results, timeout) {
     while (jobs.length) {
         let job = jobs.shift();
 
-        if (job === undefined) {
-            continue;
-        }
-
         try {
             let data = await Promise.race([job(), delay(timeout)]);
             results.push(data);
@@ -43,8 +39,8 @@ async function work(jobs, results, timeout) {
     }
 }
 
-function delay(timeout) {
-    return new Promise((then, reject) =>
+async function delay(timeout) {
+    return await new Promise((then, reject) =>
         setTimeout(() => reject(new Error('Promise timeout')), timeout));
 }
 
