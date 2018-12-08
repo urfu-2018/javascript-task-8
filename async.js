@@ -20,16 +20,16 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     return new Promise(resolve => {
         let results = new Array(jobs.length);
         let finished = 0;
-        let started = 0;
-        for (var i = 0; i < Math.min(parallelNum, jobs.length); i++) {
+        let runningTasks = 0;
+        for (let i = 0; i < Math.min(parallelNum, jobs.length); i++) {
             run(i);
         }
         function run(num) {
-            started++;
+            runningTasks++;
             const callback = result => {
                 results[num] = result;
                 if (++finished !== jobs.length) {
-                    run(started);
+                    run(runningTasks);
                 } else {
                     return resolve(results);
                 }
