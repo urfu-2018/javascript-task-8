@@ -6,48 +6,6 @@
  */
 const isStar = true;
 
-/** Функция паралелльно запускает указанное число промисов
- * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
- * @param {Number} parallelNum - число одновременно исполняющихся промисов
- * @param {Number} timeout - таймаут работы промиса
- * @returns {Promise<Array>}
- */
-function runParallel(jobs, parallelNum, timeout = 1000) {
-    return new Promise(resolve => {
-        if (jobs.length === 0) {
-            return resolve([]);
-        }
-
-        let queue = [];
-        let finishedCnt = 0;
-        let ans = [];
-        let lastIndex = 0;
-
-        function enqueueJob() {
-            let currentIndex = lastIndex;
-
-            function saveAndEnqueue(result) {
-                ans[currentIndex] = result;
-                finishedCnt += 1;
-                if (finishedCnt === jobs.length) {
-                    return resolve(ans);
-                }
-                if (lastIndex < jobs.length) {
-                    enqueueJob();
-                }
-            }
-
-            let promise = runWithTimeout(jobs[lastIndex++], timeout)
-                .then(saveAndEnqueue, saveAndEnqueue);
-            queue.push(promise);
-        }
-
-        for (let i = 0; i < Math.min(parallelNum, jobs.length); ++i) {
-            enqueueJob();
-        }
-    });
-}
-
 function runWithTimeout(job, timeout) {
     let throwAfterTimeout = new Promise(
         (resolve, reject) => {
@@ -55,6 +13,57 @@ function runWithTimeout(job, timeout) {
         });
 
     return Promise.race([job(), throwAfterTimeout]);
+}
+
+class ParallelRunner {
+    constructor(jobs, parallelNum, timeout) {
+        this.jobs = jobs;
+        this.parallelNum = parallelNum;
+        this.timeout = timeout;
+        this.finishedCnt = 0;
+        this.lastIndex = 0;
+        this.ans = [];
+    }
+
+    saveAndEnqueue(result, currentIndex, resolve) {
+        this.ans[currentIndex] = result;
+        this.finishedCnt += 1;
+        if (this.finishedCnt === this.jobs.length) {
+            return resolve(this.ans);
+        }
+        if (this.lastIndex < this.jobs.length) {
+            this.enqueueJob(resolve);
+        }
+    }
+
+    enqueueJob(resolve) {
+        let currentIndex = this.lastIndex;
+        let saveAndEnqueue = result => this.saveAndEnqueue(result, currentIndex, resolve);
+        runWithTimeout(this.jobs[this.lastIndex++], this.timeout)
+            .then(saveAndEnqueue, saveAndEnqueue);
+    }
+
+    runParallel() {
+        return new Promise(resolve => {
+            if (this.jobs.length === 0) {
+                return resolve([]);
+            }
+
+            for (let i = 0; i < Math.min(this.parallelNum, this.jobs.length); ++i) {
+                this.enqueueJob(resolve);
+            }
+        });
+    }
+}
+
+/** Функция паралелльно запускает указанное число промисов
+ * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
+ * @param {Number} parallelNum - число одновременно исполняющихся промисов
+ * @param {Number} timeout - таймаут работы промиса
+ * @returns {Promise<Array>}
+ */
+function runParallel(jobs, parallelNum, timeout = 1000) {
+    return new ParallelRunner(jobs, parallelNum, timeout).runParallel();
 }
 
 module.exports = {
