@@ -13,7 +13,12 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 async function runParallel(jobs, parallelNum, timeout = 1000) {
-    let results = [];
+    if (!jobs.length) {
+        return [];
+    }
+
+    jobs = jobs.map((job, id) => ({ id, job }));
+    let results = Array(jobs.length);
     let workers = [];
     let workersCount = Math.min(jobs.length, parallelNum);
 
@@ -31,16 +36,16 @@ async function work(jobs, results, timeout) {
         let job = jobs.shift();
 
         try {
-            let data = await Promise.race([job(), delay(timeout)]);
-            results.push(data);
+            let data = await Promise.race([job.job(), delay(timeout)]);
+            results[job.id] = data;
         } catch (error) {
-            results.push(error);
+            results[job.id] = error;
         }
     }
 }
 
-async function delay(timeout) {
-    return await new Promise((then, reject) =>
+function delay(timeout) {
+    return new Promise((then, reject) =>
         setTimeout(() => reject(new Error('Promise timeout')), timeout));
 }
 
