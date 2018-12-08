@@ -51,11 +51,17 @@ class WorkersPool {
 
 
 function setPromiseTimeout(promise, timeout) {
+    let timerID = null;
     const timerPromise = new Promise((resolve, reject) => {
-        setTimeout(reject, timeout, new Error('Promise timeout'));
+        timerID = setTimeout(reject, timeout, new Error('Promise timeout'));
+    });
+    const taskPromise = promise.then(() => {
+        if (timerID !== null) {
+            clearTimeout(timerID);
+        }
     });
 
-    return Promise.race([promise, timerPromise]);
+    return Promise.race([taskPromise, timerPromise]);
 }
 
 /** Функция паралелльно запускает указанное число промисов
