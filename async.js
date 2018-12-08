@@ -12,8 +12,36 @@ const isStar = true;
  * @param {Number} timeout - таймаут работы промиса
  * @returns {Promise<Array>}
  */
-function runParallel(jobs, parallelNum, timeout = 1000) {
-    // асинхронная магия
+async function runParallel(jobs, parallelNum, timeout = 1000) {
+    let results = [];
+    let workers = [];
+    let workersCount = Math.min(jobs.length, parallelNum);
+
+    for (let i = 0; i < workersCount; i++) {
+        workers.push(work(jobs, results, timeout));
+    }
+
+    await Promise.all(workers);
+
+    return results;
+}
+
+async function work(jobs, results, timeout) {
+    while (jobs.length) {
+        let job = jobs.shift();
+
+        try {
+            let data = await Promise.race([job(), delay(timeout)]);
+            results.push(data);
+        } catch (error) {
+            results.push(error);
+        }
+    }
+}
+
+function delay(timeout) {
+    return new Promise((then, reject) =>
+        setTimeout(() => reject(new Error('Promise timeout')), timeout));
 }
 
 module.exports = {
