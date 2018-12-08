@@ -23,13 +23,11 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         const resultArray = [];
 
         function react(response, index) {
-            if (currentIndex < jobs.length) {
-                adjustTimeOutAndReact(currentIndex++);
-            }
-
             resultArray[index] = response;
 
-            if (resultArray.length === jobs.length) {
+            if (currentIndex < jobs.length) {
+                adjustTimeOutAndReact(currentIndex++);
+            } else if (resultArray.length === jobs.length) {
                 return resolve(resultArray);
             }
         }
