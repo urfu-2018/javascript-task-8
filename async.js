@@ -25,8 +25,9 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             doJob(currentJobIndex++);
         }
 
-        function createCallBack(jobIndex) {
+        function createCallBack(jobIndex, timerId) {
             return function (result) {
+                clearTimeout(timerId);
                 results.set(jobIndex, result);
                 if (results.size === jobs.length) {
                     const resolveValue = Array.from(results)
@@ -42,10 +43,12 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         }
 
         function doJob(jobIndex) {
-            const callback = createCallBack(jobIndex);
+            let timerId;
+            const callback = createCallBack(jobIndex, timerId);
 
-            Promise.race([jobs[jobIndex](), new Promise((_, reject) =>
-                setTimeout(reject, timeout, new Error('Promise timeout')))])
+            Promise.race([jobs[jobIndex](), new Promise((_, reject) => {
+                timerId = setTimeout(reject, timeout, new Error());
+            })])
                 .then(callback, callback);
         }
     });
