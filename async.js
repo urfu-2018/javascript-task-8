@@ -47,7 +47,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             const callback = createCallBack(jobIndex, timerId);
 
             Promise.race([jobs[jobIndex](), new Promise((_, reject) => {
-                timerId = setTimeout(reject, timeout, new Error());
+                timerId = setTimeout(reject, timeout, new Error('Promise timeout'));
             })])
                 .then(callback, callback);
         }
