@@ -23,7 +23,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             return resolve([]);
         }
 
-        let taskNumber = 0;
+        let taskIndex;
         const tasksQueue = [];
 
         function addTask(jobNumber) {
@@ -33,20 +33,20 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                     return resolve(tasksQueue);
                 }
 
-                if (taskNumber < jobs.length) {
-                    taskNumber++;
-                    addTask(taskNumber - 1);
+                if (taskIndex < jobs.length) {
+                    addTask(taskIndex);
+                    taskIndex++;
                 }
             }
 
+            // noinspection JSCheckFunctionSignatures
             Promise
                 .race([jobs[jobNumber](), timeoutPromise(timeout)])
                 .then(endTask, endTask);
         }
 
-        for (let index = 0; index < Math.min(jobs.length, parallelNum); index++) {
-            taskNumber++;
-            addTask(taskNumber - 1);
+        for (taskIndex = 0; taskIndex < Math.min(jobs.length, parallelNum); taskIndex++) {
+            addTask(taskIndex);
         }
     });
 }
