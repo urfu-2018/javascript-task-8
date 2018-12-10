@@ -13,7 +13,7 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
-    if (!jobs.length) {
+    if (jobs.length === 0) {
         return Promise.resolve([]);
     }
     const result = [];
@@ -26,21 +26,22 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             }
 
             function execute(index) {
-                Promise.race([jobs[index](), new Promise(reject => {
+                Promise.race([jobs[index](), new Promise((res, reject) => {
                     setTimeout(reject, timeout, new Error('Promise timeout'));
                 })])
-                    .then(res => finished(res, index))
-                    .catch(error => finished(error, index));
+                    .then(finished(index), finished(index));
             }
 
-            function finished(res, index) {
-                result[index] = res;
-                if (result.length === jobs.length) {
-                    resolve(result);
-                }
-                if (jobIndex < jobs.length) {
-                    execute(jobIndex++);
-                }
+            function finished(index) {
+                return function (res) {
+                    result[index] = res;
+                    if (result.length === jobs.length) {
+                        resolve(result);
+                    }
+                    if (jobIndex < jobs.length) {
+                        execute(jobIndex++);
+                    }
+                };
             }
         }
     );
