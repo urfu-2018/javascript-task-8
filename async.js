@@ -69,8 +69,8 @@ function performPromiseWithTimeout(promise, timeout) {
  * @param {Number} timeoutMillis
  * @returns {Promise<Error>}
  */
-async function waitAndReturnError(timeoutMillis) {
-    return await new Promise((resolve) => {
+function waitAndReturnError(timeoutMillis) {
+    return new Promise((resolve) => {
         setTimeout(() => {
             resolve(new Error('Promise timeout'));
         }, timeoutMillis);
