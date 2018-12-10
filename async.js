@@ -36,22 +36,22 @@ async function runParallel(jobs, parallelNum, timeout = 1000) {
 /**
  *
  * @param {Function<Promise>[]} workSource
- * @param {Array} availableWorkIndexList
- * @param {Array} workResultList
+ * @param {Array} globalAvailableWorkIndexList
+ * @param {Array} globalResultList
  * @param {Number} timeout
  * @returns {Promise}
  */
-async function doWork(workSource, availableWorkIndexList, workResultList, timeout) {
-    while (availableWorkIndexList.length > 0) {
-        let index = availableWorkIndexList.shift();
+async function doWork(workSource, globalAvailableWorkIndexList, globalResultList, timeout) {
+    while (globalAvailableWorkIndexList.length > 0) {
+        let index = globalAvailableWorkIndexList.shift();
         if (index === undefined) {
             continue;
         }
         try {
             let work = workSource[index]();
-            workResultList[index] = await performPromiseWithTimeout(work, timeout);
+            globalResultList[index] = await performPromiseWithTimeout(work, timeout);
         } catch (error) {
-            workResultList[index] = error;
+            globalResultList[index] = error;
         }
     }
 }
@@ -70,7 +70,7 @@ function performPromiseWithTimeout(promise, timeout) {
  * @returns {Promise<Error>}
  */
 function waitAndReturnError(timeoutMillis) {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
         setTimeout(() => {
             resolve(new Error('Promise timeout'));
         }, timeoutMillis);
