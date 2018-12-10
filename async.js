@@ -6,10 +6,6 @@
  */
 const isStar = true;
 
-function limit(timeout) {
-    return new Promise(resolve =>
-        setTimeout(resolve, timeout, new Error('Promise timeout')));
-}
 
 class JobScheduler {
     constructor(jobs, concurrencyLevel, timeout) {
@@ -20,10 +16,15 @@ class JobScheduler {
         this.results = [];
     }
 
+    static limit(timeout) {
+        return new Promise(resolve =>
+            setTimeout(resolve, timeout, new Error('Promise timeout')));
+    }
+
     produceWrappedJob(promiseFactory) {
         return Promise.race([
             promiseFactory(),
-            limit(this.timeout)
+            JobScheduler.limit(this.timeout)
         ]);
     }
 
@@ -42,7 +43,7 @@ class JobScheduler {
         const index = this.jobIndex++;
         const job = this.jobs[index];
 
-        this.produceWrappedJob(job)
+        return this.produceWrappedJob(job)
             .then(value => this.putResultAndRunNext(value, index))
             .catch(error => this.putResultAndRunNext(error, index));
     }
@@ -50,9 +51,8 @@ class JobScheduler {
     run() {
         return new Promise(resolve => {
             this.resolve = resolve;
-            for (let i = 0; i < this.concurrencyLevel; i++) {
-                this.runJob();
-            }
+            Promise.all(Array(this.concurrencyLevel).fill(0)
+                .map(() => this.runJob()));
         });
     }
 }
