@@ -13,7 +13,27 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
-    // асинхронная магия
+    return new Promise((resolve) => {
+        if (jobs.length === 0) {
+            return resolve([]);
+        }
+        let result = [];
+        let id = 0;
+        for (let i = 0; i < Math.min(parallelNum, jobs.length); i++) {
+            runJob(id++);
+        }
+
+        async function runJob(index) {
+            const job = jobs[index]();
+            const promiseTimeout = new Promise(reject =>
+                setTimeout(reject, timeout, new Error()));
+            result[index] = await Promise.race([job, promiseTimeout]);
+            if (result.length === jobs.length) {
+                return resolve(result);
+            }
+            runJob(id++);
+        }
+    });
 }
 
 module.exports = {
