@@ -26,12 +26,13 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         async function runJob(index) {
             const job = jobs[index]();
             const promiseTimeout = new Promise(reject =>
-                setTimeout(reject, timeout, new Error()));
+                setTimeout(reject, timeout, new Error('Promise timeout')));
             result[index] = await Promise.race([job, promiseTimeout]);
             if (result.length === jobs.length) {
-                return resolve(result);
+                resolve(result);
+            } else {
+                runJob(id++);
             }
-            runJob(id++);
         }
     });
 }
