@@ -17,35 +17,35 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         return Promise.resolve([]);
     }
 
-    const resultTranslate = [];
+    const resultOfAllJob = [];
     let counter = 0;
-    const thrower = error => error;
 
-    function startTranslate(anotherTranslate) {
-        if (!anotherTranslate.length) {
+    function start(jobRemaining) {
+        if (!jobRemaining.length) {
             return;
         }
 
-        const indexTranslate = counter++;
+        const indexOfJob = counter++;
 
         return Promise.race([
             new Promise(resolve => setTimeout(resolve, timeout, new Error('Promise timeout'))),
-            anotherTranslate.shift()().catch(thrower)
-        ]).then(res => {
-            resultTranslate[indexTranslate] = res;
+            jobRemaining.shift()().catch(error => error)
+        ]).then(job => {
+            resultOfAllJob[indexOfJob] = job;
+            clearTimeout();
 
-            return startTranslate(anotherTranslate);
+            return start(jobRemaining);
         });
     }
 
     const translates = [];
 
     while (parallelNum > 0 && jobs.length) {
-        translates.push(startTranslate(jobs));
+        translates.push(start(jobs));
         parallelNum--;
     }
 
-    return Promise.all(translates).then(() => resultTranslate);
+    return Promise.all(translates).then(() => resultOfAllJob);
 }
 
 module.exports = {
