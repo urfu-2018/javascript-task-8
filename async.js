@@ -26,13 +26,16 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         }
 
         const indexOfJob = counter++;
+        let id;
 
         return Promise.race([
-            new Promise(resolve => setTimeout(resolve, timeout, new Error('Promise timeout'))),
+            new Promise(resolve => {
+                id = setTimeout(resolve, timeout, new Error('Promise timeout'));
+            }),
             jobRemaining.shift()().catch(error => error)
-        ]).then(job => {
-            resultOfAllJob[indexOfJob] = job;
-            clearTimeout();
+        ]).then(resultOfJob => {
+            resultOfAllJob[indexOfJob] = resultOfJob;
+            clearTimeout(id);
 
             return start(jobRemaining);
         });
