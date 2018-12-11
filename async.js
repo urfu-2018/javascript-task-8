@@ -6,6 +6,57 @@
  */
 const isStar = true;
 
+
+class ParallelRun {
+    constructor(jobs, parallelNum, timeout) {
+        this.jobs = jobs;
+        this.parallelNum = parallelNum;
+        this.timeout = timeout;
+        this.results = [];
+        this.jobCounter = 0;
+    }
+
+    runParallel() {
+        return new Promise(
+            resolve => {
+                if (!this.jobs.length) {
+                    return resolve(this.results);
+                }
+
+                this.jobs
+                    .slice(0, this.parallelNum)
+                    .forEach(job => this.start(job, this.jobCounter++, resolve));
+            });
+    }
+
+    start(job, index, resolve) {
+        const handle = result => this.handleResult(result, index, resolve);
+        this.runWithTimeout(job, this.timeout).then(handle, handle);
+    }
+
+    handleResult(result, index, resolve) {
+        this.results[index] = result;
+
+        if (Object.keys(this.results).length === this.jobs.length) {
+            return resolve(this.results);
+        }
+
+        if (this.jobCounter < this.jobs.length) {
+            this.start(this.jobs[this.jobCounter], this.jobCounter++, resolve);
+        }
+    }
+
+    runWithTimeout(job, timeout) {
+        let timeoutPromise = new Promise(
+            (resolve, reject) => {
+                setTimeout(reject, timeout, new Error('Promise timeout'));
+            });
+
+        return Promise.race([job(), timeoutPromise]);
+    }
+}
+
+
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
  * @param {Number} parallelNum - число одновременно исполняющихся промисов
@@ -13,45 +64,7 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
-    let results = [];
-
-    return new Promise(
-        resolve => {
-            if (!jobs.length) {
-                resolve(results);
-
-                return;
-            }
-
-            let jobCounter = 0;
-            jobs.slice(0, parallelNum)
-                .forEach(job => start(job, jobCounter++));
-
-
-            function start(job, index) {
-                const handle = result => handleResult(result, index);
-                Promise
-                    .race([job(), new Promise(rejectJob =>
-                        setTimeout(rejectJob, timeout, new Error('Promise timeout')))])
-                    .then(handle)
-                    .catch(handle);
-            }
-
-
-            function handleResult(result, index) {
-                results[index] = result;
-
-                if (Object.keys(results).length === jobs.length) {
-                    resolve(results);
-
-                    return;
-                }
-
-                if (jobCounter < jobs.length) {
-                    start(jobs[jobCounter], jobCounter++);
-                }
-            }
-        });
+    return new ParallelRun(jobs, parallelNum, timeout).runParallel();
 }
 
 
