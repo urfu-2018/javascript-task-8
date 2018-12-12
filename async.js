@@ -18,7 +18,7 @@ async function runParallel(jobs, parallelNum, timeout = 1000) {
         return [];
     }
 
-    const indexesQueue = Array.from(jobs, (job, i) => i + 1);
+    const indexesQueue = Array.from(jobs, (job, i) => i);
     const result = new Array(jobsCount);
     const count = Math.min(jobsCount, parallelNum);
 
