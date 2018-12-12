@@ -14,6 +14,9 @@ const isStar = true;
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
     return new Promise(resolve => {
+        // eslint-disable-next-line no-invalid-this
+        this.resolve = resolve;
+
         if (jobs.length === 0) {
             resolve(jobs);
         }
