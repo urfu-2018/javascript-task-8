@@ -13,8 +13,7 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
-
-    return new Promise(function (resolve) {
+    return new Promise(resolve => {
         if (jobs.length === 0) {
             resolve(jobs);
         }
@@ -37,20 +36,17 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             }
         };
 
-        async function handleJob(id) {
+        function handleJob(id) {
             const promise = jobs[id]();
 
             const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(reject, timeout, new Error('Promise timeout')));
 
-            const handle = createHandler(id);
+            const handler = createHandler(id);
 
-            try {
-                const result = await Promise.race([promise, timeoutPromise]);
-                handle(result);
-            } catch (error) {
-                handle(error);
-            }
+            Promise
+                .race([promise, timeoutPromise])
+                .then(handler, handler);
         }
 
         for (let id = 0; id < parallelNum; id++) {
