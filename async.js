@@ -13,17 +13,14 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 async function runParallel(jobs, parallelNum, timeout = 1000) {
-    if (jobs.length === 0) {
+    let jobsCount = jobs.length;
+    if (jobsCount === 0) {
         return [];
     }
 
-    const indexesQueue = [];
-    for (let i = 0; i < jobs.length; i++) {
-        indexesQueue.push(i);
-    }
-
-    const result = new Array(jobs.length);
-    const count = Math.min(jobs.length, parallelNum);
+    const indexesQueue = Array.from(jobs, (job, i) => i + 1);
+    const result = new Array(jobsCount);
+    const count = Math.min(jobsCount, parallelNum);
 
     const workers = [];
     for (let i = 0; i < count; i++) {
