@@ -13,12 +13,9 @@ const isStar = true;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
-    return new Promise(resolve => {
-        // eslint-disable-next-line no-invalid-this
-        this.resolve = resolve;
-
+    return new Promise((resolve) => {
         if (jobs.length === 0) {
-            resolve(jobs);
+            return resolve(jobs);
         }
 
         parallelNum = Math.min(parallelNum, jobs.length);
@@ -47,14 +44,16 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
 
             const handler = createHandler(id);
 
-            Promise
+            return Promise
                 .race([promise, timeoutPromise])
                 .then(handler, handler);
         }
 
+        const jobsArray = [];
         for (let id = 0; id < parallelNum; id++) {
-            handleJob(current++);
+            jobsArray.push(handleJob(current++));
         }
+        Promise.all(jobsArray);
     });
 }
 
