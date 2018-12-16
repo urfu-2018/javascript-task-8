@@ -43,17 +43,15 @@ function _runParallel(jobs, parallelNum, state) {
 
             running++;
 
+            function continuation(r) {
+                results[current] = r;
+                --running;
+                runNext();
+            }
+
             jobs[current]()
-                .then(r => {
-                    results[current] = r;
-                    --running;
-                    runNext();
-                })
-                .catch(r => {
-                    results[current] = r;
-                    --running;
-                    runNext();
-                });
+                .then(continuation, continuation)
+                .catch(continuation);
         }
 
         for (let i = 0; i < Math.min(parallelNum, jobs.length); ++i) {
