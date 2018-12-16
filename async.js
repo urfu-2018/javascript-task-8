@@ -52,10 +52,19 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     });
 }
 
+/** Функция ждёт промис указанный таймаут
+ * @param {Promise} job – промис
+ * @param {Number} timeout - таймаут работы промиса
+ * @returns {Promise}
+ */
 function runWithTimeout(job, timeout) {
     return Promise.race([job, timeoutPromise(timeout)]);
 }
 
+/** Функция, возвращающая промис, завершающийся с ошибкой через timeout миллисекунд
+ * @param {Number} timeout - таймаут работы промиса
+ * @returns {Promise}
+ */
 function timeoutPromise(timeout) {
     return new Promise(
         (resolve, reject) => setTimeout(() => reject(new Error('Promise timeout')), timeout));
