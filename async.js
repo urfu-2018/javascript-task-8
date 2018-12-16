@@ -6,9 +6,9 @@
  */
 const isStar = true;
 let results;
-let count = 0;
+let count;
 let globalResolve;
-let countFinished = 0;
+let countFinished;
 
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
@@ -18,6 +18,9 @@ let countFinished = 0;
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
     results = new Array(jobs.length);
+    count = 0;
+    countFinished = 0;
+
 
     if (jobs.length === 0) {
         return [];
@@ -26,36 +29,36 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     return new Promise(resolve => {
         globalResolve = resolve;
         while (count < parallelNum) {
-            runJob(count++);
+            runJob(jobs, count++, timeout);
         }
     });
 }
 
-function getJobPromise(indexJob) {
+function getJobPromise(job, timeout) {
     return new Promise((resolve, reject) => {
-        jobs[indexJob]()
+        job()
             .then(resolve, reject);
         setTimeout(reject, timeout, new Error('Promise timeout'));
     });
 }
 
-function runJob(indexJob) {
-    return getJobPromise(indexJob)
+function runJob(jobs, indexJob, timeout) {
+    return getJobPromise(jobs[indexJob], timeout)
         .then(result => {
             results[indexJob] = result;
-            goNextOrQuit();
+            goNextOrQuit(jobs.length);
         })
         .catch(result => {
             results[indexJob] = result;
-            goNextOrQuit();
+            goNextOrQuit(jobs.length);
         });
 }
 
-function goNextOrQuit() {
+function goNextOrQuit(globalJobsCount) {
     countFinished++;
-    if (count < jobs.length) {
+    if (count < globalJobsCount) {
         runJob(count++);
-    } else if (countFinished === jobs.length) {
+    } else if (countFinished === globalJobsCount) {
         end();
     }
 }
