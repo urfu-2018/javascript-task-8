@@ -13,19 +13,11 @@ const isStar = false;
  * @returns {Promise<Array>}
  */
 function runParallel(jobs, parallelNum, timeout = 1000) {
-    if (jobs.length === 0) {
-        return new Promise(resolve => resolve([]));
-    }
-
-    let state = {
-        cancelled: false
-    };
-
-    return runWithTimeout(_runParallel(jobs, parallelNum, state), state, timeout);
-}
-
-function _runParallel(jobs, parallelNum, state) {
     return new Promise(resolve => {
+        if (jobs.length === 0) {
+            resolve([]);
+        }
+
         let results = [];
         let index = 0;
         let running = 0;
@@ -33,7 +25,7 @@ function _runParallel(jobs, parallelNum, state) {
         function runNext() {
             const current = index++;
 
-            if (running === 0 && (state.cancelled || current >= jobs.length)) {
+            if (running === 0 && current >= jobs.length) {
                 return resolve(results);
             }
 
@@ -49,8 +41,8 @@ function _runParallel(jobs, parallelNum, state) {
                 runNext();
             }
 
-            jobs[current]()
-                .then(continuation, continuation)
+            runWithTimeout(jobs[current](), timeout)
+                .then(continuation)
                 .catch(continuation);
         }
 
@@ -60,16 +52,13 @@ function _runParallel(jobs, parallelNum, state) {
     });
 }
 
-function runWithTimeout(job, state, timeout) {
-    return Promise.race([job, timeoutPromise(state, timeout)]);
+function runWithTimeout(job, timeout) {
+    return Promise.race([job, timeoutPromise(timeout)]);
 }
 
-function timeoutPromise(state, timeout) {
+function timeoutPromise(timeout) {
     return new Promise(
-        (resolve, reject) => setTimeout(() => {
-            state.cancelled = true;
-            reject(new Error('Promise timeout'));
-        }, timeout));
+        (resolve, reject) => setTimeout(() => reject(new Error('Promise timeout')), timeout));
 }
 
 module.exports = {
