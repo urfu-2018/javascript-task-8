@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализована остановка промиса по таймауту
  */
-const isStar = true;
+const isStar = false;
 
 /** Функция паралелльно запускает указанное число промисов
  * @param {Function<Promise>[]} jobs – функции, которые возвращают промисы
@@ -17,6 +17,14 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         return new Promise(resolve => resolve([]));
     }
 
+    let state = {
+        cancelled: false
+    };
+
+    return runWithTimeout(_runParallel(jobs, parallelNum, state), state, timeout);
+}
+
+function _runParallel(jobs, parallelNum, state) {
     return new Promise(resolve => {
         let results = [];
         let index = 0;
@@ -25,8 +33,12 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         function runNext() {
             const current = index++;
 
-            if (running === 0 || current >= jobs.length) {
+            if (running === 0 && (state.cancelled || current >= jobs.length)) {
                 return resolve(results);
+            }
+
+            if (current >= jobs.length) {
+                return;
             }
 
             running++;
@@ -37,8 +49,8 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
                 runNext();
             }
 
-            runWithTimeout(jobs[current], timeout)
-                .then(continuation)
+            jobs[current]()
+                .then(continuation, continuation)
                 .catch(continuation);
         }
 
@@ -48,13 +60,16 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
     });
 }
 
-function runWithTimeout(job, timeout) {
-    return Promise.race([job, timeoutPromise(timeout)]);
+function runWithTimeout(job, state, timeout) {
+    return Promise.race([job, timeoutPromise(state, timeout)]);
 }
 
-function timeoutPromise(timeout) {
+function timeoutPromise(state, timeout) {
     return new Promise(
-        (resolve, reject) => setTimeout(() => reject(new Error('Promise timeout')), timeout));
+        (resolve, reject) => setTimeout(() => {
+            state.cancelled = true;
+            reject(new Error('Promise timeout'));
+        }, timeout));
 }
 
 module.exports = {
