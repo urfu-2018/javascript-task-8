@@ -37,6 +37,10 @@ function _runParallel(jobs, parallelNum, state) {
                 return resolve(results);
             }
 
+            if (current >= jobs.length) {
+                return;
+            }
+
             running++;
 
             jobs[current]()
