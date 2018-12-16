@@ -28,21 +28,26 @@ function _runParallel(jobs, parallelNum, state) {
     return new Promise(resolve => {
         let results = [];
         let index = 0;
+        let running = 0;
 
         function runNext() {
             const current = index++;
 
-            if (state.cancelled || current >= jobs.length) {
+            if (running === 0 && (state.cancelled || current >= jobs.length)) {
                 return resolve(results);
             }
+
+            running++;
 
             jobs[current]()
                 .then(r => {
                     results[current] = r;
+                    --running;
                     runNext();
                 })
                 .catch(r => {
                     results[current] = r;
+                    --running;
                     runNext();
                 });
         }
