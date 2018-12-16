@@ -32,6 +32,10 @@ function _runParallel(jobs, parallelNum) {
                 .then(r => {
                     results[current] = r;
                     runNext();
+                })
+                .catch(r => {
+                    results[current] = r;
+                    runNext();
                 });
         }
 
