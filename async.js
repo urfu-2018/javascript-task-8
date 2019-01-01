@@ -21,25 +21,27 @@ function runParallel(jobs, parallelNum) {
             resolve([]);
         }
 
-        for (let i = 0; i < Math.min(jobs.length, parallelNum); i++) {
+        for (let i = 0; i < Math.min(jobs.length, parallelNum, timeout = 1000); i++) {
             runNextJob(jobNumber++);
         }
 
         function runNextJob(jobNum) {
-            jobs[jobNum]().then(result => handleResult(result, jobNum));
-        }
+            function handleResult(res) {
+                results[jobNum] = res;
 
-        function handleResult(res, jobNum) {
-            results[jobNum] = res;
+                if (results.length === jobs.length) {
+                    return resolve(results);
+                }
 
-            if (results.length === jobs.length) {
-                return resolve(results);
+                if (jobNumber < jobs.length) {
+                    runNextJob(jobNumber++);
+                }
             }
 
-            if (jobNumber < jobs.length) {
-                runNextJob(jobNumber++);
-            }
+            jobs[jobNum]().then(handleResult, handleResult);
         }
+
+
     });
 }
 
