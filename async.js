@@ -21,7 +21,7 @@ function runParallel(jobs, parallelNum) {
             resolve([]);
         }
 
-        for (let i = 0; i < Math.min(jobs.length, parallelNum, timeout = 1000); i++) {
+        for (let i = 0; i < Math.min(jobs.length, parallelNum); i++) {
             runNextJob(jobNumber++);
         }
 
