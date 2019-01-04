@@ -17,27 +17,29 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         if (jobs.length === 0) {
             resolve([]);
         }
-        for (let i = 0; i < parallelNum; i++) {
-            count += 1;
-            runJobsFunction(jobs[count - 1], count - 1);
+
+        while (count < parallelNum) {
+            runJobs(jobs[count], count);
+            count++;
         }
 
-        function runJobsFunction(job, index) {
-            const finalFunction = currentResult => endOfWork(currentResult, index);
+        function runJobs(job, index) {
+            const promiseTimeout = currentResult => endOfWork(currentResult, index);
 
-            Promise.race([job(), new Promise((errorMessage) =>
-                setTimeout(errorMessage, timeout, new Error('Promise timeout')))])
-                .then(finalFunction, finalFunction);
+            Promise
+                .race([job(), new Promise(reject =>
+                    setTimeout(reject, timeout, new Error('Promise timeout')))])
+                .then(promiseTimeout);
         }
 
         function endOfWork(result, index) {
             results[index] = result;
-            if (results.length === jobs.length) {
+            if (count === jobs.length) {
                 resolve(results);
             }
             if (count < jobs.length) {
+                runJobs(jobs[count], count);
                 count += 1;
-                runJobsFunction(jobs[count - 1], count - 1);
             }
         }
     });
