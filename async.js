@@ -18,7 +18,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             resolve([]);
         }
 
-        while (count < parallelNum) {
+        for (let i = 0; i < parallelNum; i++) {
             runJobs(jobs[count], count);
             count += 1;
         }
@@ -29,7 +29,7 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
             Promise
                 .race([job(), new Promise(reject =>
                     setTimeout(reject, timeout, new Error('Promise timeout')))])
-                .then(promiseTimeout);
+                .then(promiseTimeout, promiseTimeout);
         }
 
         function endOfWork(result, index) {
