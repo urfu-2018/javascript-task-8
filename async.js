@@ -24,23 +24,21 @@ function runParallel(jobs, parallelNum, timeout = 1000) {
         }
 
         function runJobs(job, index) {
-            const promiseTimeout = currentResult => endOfWork(currentResult, index);
+            const promiseTimeout = currentResult => {
+                results[index] = currentResult;
+                if (results.length === jobs.length) {
+                    resolve(results);
+                }
+                if (count < jobs.length) {
+                    runJobs(jobs[count], count);
+                    count += 1;
+                }
+            };
 
             Promise
                 .race([job(), new Promise((res, rej) =>
                     setTimeout(rej, timeout, new Error('Promise timeout')))])
                 .then(promiseTimeout, promiseTimeout);
-        }
-
-        function endOfWork(result, index) {
-            results[index] = result;
-            if (results.length === jobs.length) {
-                resolve(results);
-            }
-            if (count < jobs.length) {
-                runJobs(jobs[count], count);
-                count += 1;
-            }
         }
     });
 }
