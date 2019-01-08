@@ -36,6 +36,8 @@ function exitJob(resultObject, resolve, results, jobs) {
  * @returns {Promise<Array>}
  */
 async function runParallel(jobs, parallelNum) {
+    lastStartedIndex = 0;
+
     return new Promise(resolve => {
         const results = [];
 
