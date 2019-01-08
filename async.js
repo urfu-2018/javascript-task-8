@@ -41,8 +41,6 @@ async function runParallel(jobs, parallelNum) {
 
         if (jobs.length === 0) {
             resolve([]);
-
-            return;
         }
 
         while (lastStartedIndex < parallelNum) {
