@@ -54,6 +54,5 @@ async function runParallel(jobs, parallelNum) {
 
 module.exports = {
     runParallel,
-
     isStar
 };
